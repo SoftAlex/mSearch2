@@ -35,9 +35,11 @@ $generator = $manager->getGenerator();
 $generator->parseSchema($xml, $Model);
 $modx->addPackage($package, $Model);
 
-//$manager->removeObjectContainer('mSearch2Item');
+//$manager->removeObjectContainer('mseWord');
+//$manager->removeObjectContainer('mseIntro');
 
-//$manager->createObjectContainer('mSearch2Item');
+//$manager->createObjectContainer('mseWord');
+//$manager->createObjectContainer('mseIntro');
 
 print "\nDone\n";
 

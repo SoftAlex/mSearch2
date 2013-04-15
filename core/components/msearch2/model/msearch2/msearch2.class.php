@@ -109,46 +109,54 @@ class mSearch2 {
 
 	/*
 	 * Gets base form of the words
+	 *
+	 * @param array|string $text
+	 *
+	 * @return array|string
 	 * */
-	function getBaseForms($text, $as_text = true, $delimeter = ' ') {
-		$text = strip_tags($text);
-		$words = preg_replace('#\[.*\]#isU', '', $text);
-		$words = preg_split('#\s|[,.:;!?"\'()]#', $words, -1, PREG_SPLIT_NO_EMPTY);
-
-		$bulk_words = array();
-		foreach ($words as $v) {
-			if (mb_strlen($v,'UTF-8') > $this->config['min_word_length'])
-				$bulk_words[] = mb_strtoupper($v, 'UTF-8');
-		}
-
-		$this->loadPhpMorphy();
-		/* @var phpMorphy $phpMorphy */
-		$base_forms = array();
-		foreach ($this->phpMorphy as $phpMorphy) {
-			$locale = $phpMorphy->getLocale();
-			$base_forms[$locale] = $phpMorphy->getBaseForm($bulk_words);
-		}
-
+	function getBaseForms($text) {
 		$result = array();
-		if (!empty($base_forms)) {
-			foreach ($base_forms as $lang) {
-				if (!empty($lang)) {
-					foreach ($lang as $forms) {
-						if (!empty($forms)) {
-							foreach ($forms as $form) {
-								if (mb_strlen($form,'UTF-8') > $this->config['min_word_length']) {
-									$result[$form] = 1;
+		if (is_array($text)) {
+			foreach ($text as $v) {
+				$result = array_merge($result, $this->getBaseForms($v));
+			}
+		}
+		else {
+			$text = str_ireplace('ё', 'е', $this->modx->stripTags($text));
+			$words = preg_replace('#\[.*\]#isU', '', $text);
+			$words = preg_split('#\s|[,.:;!?"\'\\\/()]#', $words, -1, PREG_SPLIT_NO_EMPTY);
+
+			$bulk_words = array();
+			foreach ($words as $v) {
+				if (mb_strlen($v,'UTF-8') > $this->config['min_word_length'])
+					$bulk_words[] = mb_strtoupper($v, 'UTF-8');
+			}
+
+			$this->loadPhpMorphy();
+			/* @var phpMorphy $phpMorphy */
+			$base_forms = array();
+			foreach ($this->phpMorphy as $phpMorphy) {
+				$locale = $phpMorphy->getLocale();
+				$base_forms[$locale] = $phpMorphy->getBaseForm($bulk_words);
+			}
+
+			$result = array();
+			if (!empty($base_forms)) {
+				foreach ($base_forms as $lang) {
+					if (!empty($lang)) {
+						foreach ($lang as $forms) {
+							if (!empty($forms)) {
+								foreach ($forms as $form) {
+									if (mb_strlen($form,'UTF-8') > $this->config['min_word_length']) {
+										$result[$form] = 1;
+									}
 								}
 							}
 						}
 					}
 				}
 			}
-		}
-
-		$result = array_keys($result);
-		if ($as_text) {
-			$result = implode($delimeter, $result);
+			$result = array_keys($result);
 		}
 
 		return $result;
@@ -157,47 +165,51 @@ class mSearch2 {
 
 	/*
 	 * Gets all morphological forms of the words
-	 * */
-	function getAllForms($text, $as_text = true, $delimeter = ' ') {
-		$words = preg_split('#\s|[,.:;!?"\'()]#', $text, -1, PREG_SPLIT_NO_EMPTY);
-		$bulk_words = array();
-		foreach ($words as $v) {
-			if (mb_strlen($v,'UTF-8') > $this->config['min_word_length']) {
-				$bulk_words[] = mb_strtoupper($v, 'UTF-8');
+	 *
+	 * @param array|string $text
+	 *
+	 * @return array|string
+	 */
+	function getAllForms($text) {
+		$result = array();
+		if (is_array($text)) {
+			foreach ($text as $v) {
+				$result = array_merge($result, $this->getAllForms($v));
 			}
 		}
+		else {
+			$text = str_ireplace('ё', 'е', $this->modx->stripTags($text));
+			$words = preg_split('#\s|[,.:;!?"\'\\\/()]#', $text, -1, PREG_SPLIT_NO_EMPTY);
+			$bulk_words = array();
+			foreach ($words as $v) {
+				if (mb_strlen($v,'UTF-8') > $this->config['min_word_length']) {
+					$bulk_words[] = mb_strtoupper($v, 'UTF-8');
+				}
+			}
 
-		$this->loadPhpMorphy();
-		/* @var phpMorphy $phpMorphy */
-		$all_forms = array();
-		foreach ($this->phpMorphy as $phpMorphy) {
-			$locale = $phpMorphy->getLocale();
-			$all_forms[$locale] = $phpMorphy->getAllForms($bulk_words);
-		}
+			$this->loadPhpMorphy();
+			/* @var phpMorphy $phpMorphy */
+			$all_forms = array();
+			foreach ($this->phpMorphy as $phpMorphy) {
+				$locale = $phpMorphy->getLocale();
+				$all_forms[$locale] = $phpMorphy->getAllForms($bulk_words);
+			}
 
-		$result = array();
-		if (!empty($all_forms)) {
-			foreach ($all_forms as $lang) {
-				if (!empty($lang)) {
-					foreach ($lang as $word => $forms) {
-						if (!empty($forms)) {
-							$result[$word] = array_key_exists($word, $result) ? array_merge($result['$word'], $forms) : $forms;
+			$result = array();
+			if (!empty($all_forms)) {
+				foreach ($all_forms as $lang) {
+					if (!empty($lang)) {
+						foreach ($lang as $word => $forms) {
+							if (!empty($forms)) {
+								$result[$word] = array_key_exists($word, $result) ? array_merge($result['$word'], $forms) : $forms;
+							}
 						}
 					}
 				}
 			}
 		}
 
-		if ($as_text) {
-			$string = '';
-			foreach ($result as $v) {
-				$string .= $delimeter.implode($delimeter, $v);
-			}
-			return $string;
-		}
-		else {
-			return $result;
-		}
+		return $result;
 	}
 
 }

@@ -1,13 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model package="msearch2" baseClass="xPDOObject" platform="mysql" defaultEngine="MyISAM" phpdoc-package="msearch2" version="1.1">
 
-	<object class="mSearch2Item" table="msearch2_items" extends="xPDOSimpleObject">
-		<field key="name" dbtype="varchar" precision="100" phptype="string" null="false" default="" />
-		<field key="description" dbtype="text" phptype="text" null="true" default="" />
+	<object class="mseWord" table="mse2_words" extends="xPDOObject">
+		<field key="word" dbtype="varchar" precision="32" phptype="string" null="false" />
+		<field key="resource" dbtype="integer" precision="10" phptype="integer" attributes="unsigned" null="false" />
+		<field key="weight" dbtype="integer" precision="10" phptype="integer" attributes="unsigned" null="false" />
 
-		<index alias="name" name="name" primary="false" unique="false" type="BTREE">
-			<column key="name" length="" collation="A" null="false" />
+		<index alias="word" name="word" primary="true" unique="true" type="BTREE">
+			<column key="word" length="" collation="A" null="false" />
+			<column key="resource" length="" collation="A" null="false" />
 		</index>
+
+		<aggregate alias="Resource" class="modResource" local="resource" foreign="id" owner="foreign" cardinality="one" />
+	</object>
+
+	<object class="mseIntro" table="mse2_intro" extends="xPDOObject">
+		<field key="resource" dbtype="integer" precision="10" phptype="integer" attributes="unsigned" null="false" />
+		<field key="text" dbtype="mediumtext" phptype="string" null="false" />
+
+		<index alias="resource" name="resource" primary="true" unique="true" type="BTREE">
+			<column key="resource" length="" collation="A" null="false" />
+		</index>
+
+		<composite alias="Words" class="mseWord" local="resource" foreign="resource" owner="local" cardinality="many" />
+		<aggregate alias="Resource" class="modResource" local="resource" foreign="id" owner="foreign" cardinality="one" />
 	</object>
 
 </model>

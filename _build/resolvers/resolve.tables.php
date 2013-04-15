@@ -11,7 +11,8 @@ if ($object->xpdo) {
 			$modx->addPackage('msearch2', $modelPath);
 
 			$manager = $modx->getManager();
-			$manager->createObjectContainer('mSearch2Item');
+			$manager->createObjectContainer('mseWord');
+			$manager->createObjectContainer('mseIntro');
 		break;
 
 		case xPDOTransport::ACTION_UPGRADE:
