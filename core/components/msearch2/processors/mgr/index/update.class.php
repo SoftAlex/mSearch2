@@ -6,9 +6,9 @@
  * @subpackage processors
  */
 
-require 'create.class.php';
+require_once 'create.class.php';
 
-class mseWordUpdateProcessor extends mseWordCreateProcessor {
+class mseIndexUpdateProcessor extends mseIndexCreateProcessor {
 
 	public function process() {
 		if (!$this->getProperty('id')) {
@@ -34,4 +34,4 @@ class mseWordUpdateProcessor extends mseWordCreateProcessor {
 
 }
 
-return 'mseWordUpdateProcessor';
+return 'mseIndexUpdateProcessor';

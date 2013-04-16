@@ -16,7 +16,7 @@ class mSearch2ItemCreateProcessor extends modObjectCreateProcessor {
 			'name' => $this->getProperty('name'),
 		));
 		if ($alreadyExists) {
-			$this->modx->error->addField('name',$this->modx->lexicon('msearch2_item_err_ae'));
+			$this->modx->error->addField('name',$this->modx->lexicon('mse2_item_err_ae'));
 		}
 		return !$this->hasErrors();
 	}

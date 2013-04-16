@@ -13,21 +13,29 @@ $tmp = array(
 		'type' => 'textfield'
 		,'value' => 'tpl.mSearch2.item'
 	)
-	,'sortBy' => array(
-		'type' => 'textfield'
-		,'value' => 'name'
+	,'returnIds' => array(
+		'type' => 'combo-boolean'
+		,'value' => false
 	)
-	,'sortDir' => array(
-		'type' => 'list'
-		,'options' => array(
-			array('text' => 'ASC', 'value' => 'ASC')
-			,array('text' => 'DESC', 'value' => 'DESC')
-		)
-		,'value' => 'ASC'
+	,'showLog' => array(
+		'type' => 'combo-boolean'
+		,'value' => false
+	)
+	,'fastMode' => array(
+		'type' => 'combo-boolean'
+		,'value' => false
 	)
 	,'limit' => array(
 		'type' => 'numberfield'
-		,'value' => 5
+		,'value' => 10
+	)
+	,'offset' => array(
+		'type' => 'numberfield'
+		,'value' => 0
+	)
+	,'depth' => array(
+		'type' => 'numberfield'
+		,'value' => 10
 	)
 	,'outputSeparator' => array(
 		'type' => 'textfield'
@@ -37,12 +45,40 @@ $tmp = array(
 		'type' => 'combo-boolean'
 		,'value' => false
 	)
+	,'parents' => array(
+		'type' => 'textfield'
+		,'value' => ''
+	)
+	,'includeTVs' => array(
+		'type' => 'textfield'
+		,'value' => ''
+	)
+	,'tvPrefix' => array(
+		'type' => 'textfield'
+		,'value' => ''
+	)
+	,'where' => array(
+		'type' => 'textfield'
+		,'value' => ''
+	)
+	,'showUnpublished' => array(
+		'type' => 'combo-boolean'
+		,'value' => false
+	)
+	,'showDeleted' => array(
+		'type' => 'combo-boolean'
+		,'value' => false
+	)
+	,'showHidden' => array(
+		'type' => 'combo-boolean'
+		,'value' => true
+	)
 );
 
 foreach ($tmp as $k => $v) {
 	$properties[] = array_merge(array(
 			'name' => $k
-			,'desc' => 'msearch2_prop_'.$k
+			,'desc' => 'mse2_prop_'.$k
 			,'lexicon' => 'msearch2:properties'
 		), $v
 	);

@@ -7,10 +7,11 @@
  */
 
 $menus = array();
+return $menus;
 
 $tmp = array(
 	'msearch2' => array(
-		'description' => 'msearch2_menu_desc'
+		'description' => 'mse2_menu_desc'
 		,'action' => array(
 			'controller' => 'index'
 		)

@@ -11,7 +11,7 @@ require_once dirname(dirname(dirname(dirname(__FILE__)))).'/index.php';
 /*******************************************************/
 
 $package = 'msearch2'; // Class name for generation
-$suffix = 'msearch2_'; // Suffix of tables.
+$suffix = 'mse2_'; // Suffix of tables.
 $prefix = $modx->config['table_prefix']; // table prefix
 
 // Folders for schema and model

@@ -15,9 +15,9 @@ mSearch2.panel.Home = function(config) {
 			,activeItem: 0
 			,hideMode: 'offsets'
 			,items: [{
-				title: _('msearch2_items')
+				title: _('mse2_items')
 				,items: [{
-					html: _('msearch2_intro_msg')
+					html: _('mse2_intro_msg')
 					,border: false
 					,bodyCssClass: 'panel-desc'
 					,bodyStyle: 'margin-bottom: 10px'

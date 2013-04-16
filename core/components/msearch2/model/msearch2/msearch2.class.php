@@ -10,15 +10,15 @@ class mSearch2 {
 	public $modx;
 	/* @var mSearch2ControllerRequest $request */
 	protected $request;
-	public $initialized = array();
+	//public $initialized = array();
 	public $phpMorphy = array();
 
 
 	function __construct(modX &$modx,array $config = array()) {
 		$this->modx =& $modx;
 
-		$corePath = $this->modx->getOption('msearch2_core_path', $config, $this->modx->getOption('core_path').'components/msearch2/');
-		$assetsUrl = $this->modx->getOption('msearch2_assets_url', $config, $this->modx->getOption('assets_url').'components/msearch2/');
+		$corePath = $this->modx->getOption('msearch2.core_path', $config, $this->modx->getOption('core_path').'components/msearch2/');
+		$assetsUrl = $this->modx->getOption('msearch2.assets_url', $config, $this->modx->getOption('assets_url').'components/msearch2/');
 		$connectorUrl = $assetsUrl.'connector.php';
 
 		$this->config = array_merge(array(
@@ -31,9 +31,7 @@ class mSearch2 {
 
 			,'corePath' => $corePath
 			,'modelPath' => $corePath.'model/'
-			//,'chunksPath' => $corePath.'elements/chunks/'
 			,'templatesPath' => $corePath.'elements/templates/'
-			//,'snippetsPath' => $corePath.'elements/snippets/'
 			,'processorsPath' => $corePath.'processors/'
 
 			,'languages' => array(
@@ -45,6 +43,8 @@ class mSearch2 {
 				)
 			)
 			,'min_word_length' => 3
+			,'text_cut_before' => 50
+			,'text_cut_after' => 250
 		), $config);
 
 		if (!is_array($this->config['languages'])) {
@@ -103,6 +103,7 @@ class mSearch2 {
 				}
 			}
 		}
+
 		return true;
 	}
 
@@ -115,6 +116,7 @@ class mSearch2 {
 	 * @return array|string
 	 * */
 	function getBaseForms($text) {
+
 		$result = array();
 		if (is_array($text)) {
 			foreach ($text as $v) {
@@ -141,16 +143,13 @@ class mSearch2 {
 			}
 
 			$result = array();
-			if (!empty($base_forms)) {
-				foreach ($base_forms as $lang) {
-					if (!empty($lang)) {
-						foreach ($lang as $forms) {
-							if (!empty($forms)) {
-								foreach ($forms as $form) {
-									if (mb_strlen($form,'UTF-8') > $this->config['min_word_length']) {
-										$result[$form] = 1;
-									}
-								}
+			foreach ($base_forms as $lang) {
+				if (!empty($lang)) {
+					foreach ($lang as $forms) {
+						if (!$forms) {$forms = $bulk_words;}
+						foreach ($forms as $form) {
+							if (mb_strlen($form,'UTF-8') > $this->config['min_word_length']) {
+								$result[$form] = 1;
 							}
 						}
 					}
@@ -158,6 +157,8 @@ class mSearch2 {
 			}
 			$result = array_keys($result);
 		}
+
+
 
 		return $result;
 	}
@@ -210,6 +211,91 @@ class mSearch2 {
 		}
 
 		return $result;
+	}
+
+
+	/**
+	 * Search and return array with resources ids as a key and sum of weight as value
+	 *
+	 * @param $query
+	 *
+	 * @return array
+	 */
+	public function Search($query) {
+		$string = preg_replace('/[^_-а-яёa-z0-9\s\.]+/iu', ' ', $this->modx->stripTags($query));
+		$worms = $this->getBaseForms($string);
+
+		$result = array();
+		$q = $this->modx->newQuery('mseWord');
+		$q->select('`resource`, SUM(`weight`) as `weight`');
+		$q->groupby('`resource`');
+		$q->where(array('word:IN' => $worms));
+		$q->sortby('weight','DESC');
+		if ($q->prepare() && $q->stmt->execute()) {
+			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
+				$result[$row['resource']] = $row['weight'];
+			}
+		}
+
+		return $result;
+	}
+
+
+	/**
+	 * Highlight of the string
+	 * */
+	function Highlight($text, $query) {
+		$all_forms = $this->getAllForms($query);
+
+		$text_cut = ''; $words = array();
+		foreach ($all_forms as $forms) {
+			foreach ($forms as $form) {
+				// Cutting text on first occurrence
+				if (empty($text_cut) && preg_match('/'.$form.'/imu', $text, $matches)) {
+					$pos = mb_strpos($text, $matches[0], 0, 'UTF-8');
+					if ($pos >= $this->config['text_cut_before']) {
+						$text_cut = '... ';
+						$pos -= $this->config['text_cut_before'];
+					}
+					else {
+						$text_cut = '';
+						$pos = 0;
+					}
+					$text_cut .= mb_substr($text, $pos, $this->config['text_cut_after'], 'UTF-8');
+					if (mb_strlen($text,'UTF-8') > $this->config['text_cut_after']) {$text_cut .= ' ...';}
+
+					break;
+				}
+			}
+			$words = array_merge($words, $forms);
+		}
+
+		preg_match_all('/(?:\s|)('.implode('|',$words).')[^а-яёa-z0-9]/imu', $text_cut, $matches);
+		$from = $to = array();
+		foreach ($matches[0] as $v) {
+			$string = trim($v);
+			$from[$string] = $string;
+			$to[$string] = '<span class="highlight">'.$string.'</span>';
+		}
+
+		return str_replace($from, $to, $text_cut);
+	}
+
+	/**
+	 * Recursive implode
+	 *
+	 * @param $glue
+	 * @param array $array
+	 *
+	 * @return string
+	 */
+	function implode_r($glue, array $array) {
+		$result = array();
+		foreach ($array as $v) {
+			$result[] = is_array($v) ? $this->implode_r($glue, $v) : $v;
+		}
+
+		return implode($glue, $result);
 	}
 
 }

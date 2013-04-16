@@ -16,7 +16,7 @@ mSearch2.grid.Items = function(config) {
 			,{header: _('description'),dataIndex: 'description',width: 250}
 		]
 		,tbar: [{
-			text: _('msearch2_item_create')
+			text: _('mse2_item_create')
 			,handler: this.createItem
 			,scope: this
 		}]
@@ -35,12 +35,12 @@ Ext.extend(mSearch2.grid.Items,MODx.grid.Grid,{
 	,getMenu: function() {
 		var m = [];
 		m.push({
-			text: _('msearch2_item_update')
+			text: _('mse2_item_update')
 			,handler: this.updateItem
 		});
 		m.push('-');
 		m.push({
-			text: _('msearch2_item_remove')
+			text: _('mse2_item_remove')
 			,handler: this.removeItem
 		});
 		this.addContextMenuItem(m);
@@ -92,8 +92,8 @@ Ext.extend(mSearch2.grid.Items,MODx.grid.Grid,{
 		if (!this.menu.record) return false;
 		
 		MODx.msg.confirm({
-			title: _('msearch2_item_remove')
-			,text: _('msearch2_item_remove_confirm')
+			title: _('mse2_item_remove')
+			,text: _('mse2_item_remove_confirm')
 			,url: this.config.url
 			,params: {
 				action: 'mgr/item/remove'
@@ -114,7 +114,7 @@ mSearch2.window.CreateItem = function(config) {
 	config = config || {};
 	this.ident = config.ident || 'mecitem'+Ext.id();
 	Ext.applyIf(config,{
-		title: _('msearch2_item_create')
+		title: _('mse2_item_create')
 		,id: this.ident
 		,height: 200
 		,width: 475
@@ -136,7 +136,7 @@ mSearch2.window.UpdateItem = function(config) {
 	config = config || {};
 	this.ident = config.ident || 'meuitem'+Ext.id();
 	Ext.applyIf(config,{
-		title: _('msearch2_item_update')
+		title: _('mse2_item_update')
 		,id: this.ident
 		,height: 200
 		,width: 475

@@ -16,7 +16,7 @@
 
 	<object class="mseIntro" table="mse2_intro" extends="xPDOObject">
 		<field key="resource" dbtype="integer" precision="10" phptype="integer" attributes="unsigned" null="false" />
-		<field key="text" dbtype="mediumtext" phptype="string" null="false" />
+		<field key="intro" dbtype="mediumtext" phptype="string" null="false" />
 
 		<index alias="resource" name="resource" primary="true" unique="true" type="BTREE">
 			<column key="resource" length="" collation="A" null="false" />

@@ -7,7 +7,7 @@ if ($object->xpdo) {
 		case xPDOTransport::ACTION_INSTALL:
 			/* @var modX $modx */
 			$modx =& $object->xpdo;
-			$modelPath = $modx->getOption('msearch2_core_path',null,$modx->getOption('core_path').'components/msearch2/').'model/';
+			$modelPath = $modx->getOption('msearch2.core_path',null,$modx->getOption('core_path').'components/msearch2/').'model/';
 			$modx->addPackage('msearch2', $modelPath);
 
 			$manager = $modx->getManager();

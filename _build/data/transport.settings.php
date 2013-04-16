@@ -12,7 +12,7 @@ $tmp = array(
 	'some_setting' => array(
 		'xtype' => 'combo-boolean'
 		,'value' => true
-		,'area' => 'msearch2_main'
+		,'area' => 'mse2_main'
 	)
 	*/
 );
@@ -22,7 +22,7 @@ foreach ($tmp as $k => $v) {
 	$setting = $modx->newObject('modSystemSetting');
 	$setting->fromArray(array_merge(
 		array(
-			'key' => 'msearch2_'.$k
+			'key' => 'mse2_'.$k
 			,'namespace' => 'msearch2'
 		), $v
 	),'',true,true);

@@ -5,7 +5,7 @@
  * @package msearch2
  * @subpackage processors
  */
-class mseWordCreateProcessor extends modProcessor {
+class mseIndexCreateProcessor extends modProcessor {
 	/** @var string $objectType The object "type", this will be used in various lexicon error strings */
 	public $objectType = 'mseWord';
 	/** @var string $classKey The class key of the Object to iterate */
@@ -54,7 +54,7 @@ class mseWordCreateProcessor extends modProcessor {
 
 		$this->loadClass();
 		if ($process_comments = $this->modx->getOption('mse2_index_comments', null, true, true) && class_exists('Ticket')) {
-			$this->fields['comments'] = $this->modx->getOption('mse2_index_comments_weight', null, 1, true);
+			$this->fields['resource_comments'] = $this->modx->getOption('mse2_index_comments_weight', null, 1, true);
 		}
 		else {$process_comments = false;}
 
@@ -77,7 +77,7 @@ class mseWordCreateProcessor extends modProcessor {
 					}
 				}
 			}
-			$resource->set('comments', $comments);
+			$resource->set('resource_comments', $comments);
 
 			$this->Index($resource);
 			$i++;
@@ -105,6 +105,7 @@ class mseWordCreateProcessor extends modProcessor {
 
 		$c = $this->modx->newQuery('modResource');
 		$c->limit($limit, $offset);
+		$c->sortby('id','ASC');
 		$c->select($this->modx->getSelectColumns('modResource', 'modResource', '', $select_fields));
 		$c = $this->prepareQuery($c);
 
@@ -146,7 +147,7 @@ class mseWordCreateProcessor extends modProcessor {
 			$text = (strpos($field, 'tv_') !== false) ? $resource->getTVValue(substr($field, 3)) : $resource->get($field);
 
 			$forms = $this->mSearch2->getBaseForms($text);
-			$intro .= $this->modx->stripTags(is_array($text) ? $this->implode_r(' ', $text) : $text).' ';
+			$intro .= $this->modx->stripTags(is_array($text) ? $this->mSearch2->implode_r(' ', $text) : $text).' ';
 
 			foreach ($forms as $form) {
 				if (array_key_exists($form, $words)) {
@@ -162,8 +163,9 @@ class mseWordCreateProcessor extends modProcessor {
 		$tintro = $this->modx->getTableName('mseIntro');
 		$resource_id = $resource->get('id');
 
-		$intro = preg_replace('/\s+/', ' ', str_replace(array('\'','"','«','»','`',"\n","\r\n","\r"), '', $intro));
-		$sql = "INSERT INTO {$tintro} (`resource`, `text`) VALUES ('$resource_id', '$intro') ON DUPLICATE KEY UPDATE `text` = '$intro';";
+		$intro = str_replace(array("\n","\r\n","\r"), ' ', $intro);
+		$intro = preg_replace('/\s+/', ' ', str_replace(array('\'','"','«','»','`'), '', $intro));
+		$sql = "INSERT INTO {$tintro} (`resource`, `intro`) VALUES ('$resource_id', '$intro') ON DUPLICATE KEY UPDATE `intro` = '$intro';";
 		$sql .= "DELETE FROM {$tword} WHERE `resource` = '$resource_id';";
 		$sql .= "INSERT INTO {$tword} (`resource`, `word`, `weight`) VALUES ";
 		if (!empty($words)) {
@@ -191,33 +193,17 @@ class mseWordCreateProcessor extends modProcessor {
 	 * @return bool
 	 */
 	public function loadClass() {
-		if (!empty($this->modx->mSearch2) && !($this->modx->mSearch2 instanceof mSearch2)) {
+		if (!empty($this->modx->mSearch2) && $this->modx->mSearch2 instanceof mSearch2) {
 			$this->mSearch2 = & $this->modx->mSearch2;
 		}
 		else {
-			require_once MODX_CORE_PATH . 'components/msearch2/model/msearch2/msearch2.class.php';
+			if (!class_exists('mSearch2')) {require_once MODX_CORE_PATH . 'components/msearch2/model/msearch2/msearch2.class.php';}
 			$this->mSearch2 = new mSearch2($this->modx, array());
 		}
 
 		return $this->mSearch2 instanceof mSearch2;
 	}
 
-
-	/**
-	 * Recursive implode
-	 *
-	 * @param $glue
-	 * @param array $array
-	 *
-	 * @return string
-	 */function implode_r($glue, array $array) {
-		$result = array();
-		foreach ($array as $v) {
-			$result[] = is_array($v) ? $this->implode_r($glue, $v) : $v;
-		}
-		return implode($glue, $result);
-	}
-
 }
 
-return 'mseWordCreateProcessor';
+return 'mseIndexCreateProcessor';
