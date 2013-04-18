@@ -1,5 +1,4 @@
 <?php
-
 /* @var mSearch2 $mSearch2 */
 $mSearch2 = $modx->getService('msearch2','mSearch2',$modx->getOption('msearch2.core_path',null,$modx->getOption('core_path').'components/msearch2/').'model/msearch2/',$scriptProperties);
 /* @var pdoFetch $pdoFetch */

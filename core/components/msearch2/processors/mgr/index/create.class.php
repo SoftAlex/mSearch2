@@ -83,7 +83,7 @@ class mseIndexCreateProcessor extends modProcessor {
 			$i++;
 		}
 
-		return $this->success($i);
+		return $this->success('', array('indexed' => $i));
 	}
 
 

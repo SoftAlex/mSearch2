@@ -11,7 +11,7 @@ switch ($options[xPDOTransport::PACKAGE_ACTION]) {
 		$exists =
 			$modx->getObject('transport.modTransportPackage', array('package_name' => 'pdoTools'))
 			&&
-			file_exists(MODX_CORE_PATH . 'components/msearch/phpmorphy/dicts/installed');
+			file_exists(MODX_CORE_PATH . 'components/msearch2/phpmorphy/dicts/.installed');
 		break;
 
 	case xPDOTransport::ACTION_UNINSTALL: break;

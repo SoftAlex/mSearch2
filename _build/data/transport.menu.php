@@ -7,7 +7,6 @@
  */
 
 $menus = array();
-return $menus;
 
 $tmp = array(
 	'msearch2' => array(

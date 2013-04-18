@@ -244,7 +244,7 @@ class mSearch2 {
 	/**
 	 * Highlight of the string
 	 * */
-	function Highlight($text, $query) {
+	function Highlight($text, $query, $tag1 = '<span class="highlight">', $tag2 = '</span>') {
 		$all_forms = $this->getAllForms($query);
 
 		$text_cut = ''; $words = array();
@@ -275,7 +275,7 @@ class mSearch2 {
 		foreach ($matches[0] as $v) {
 			$string = trim($v);
 			$from[$string] = $string;
-			$to[$string] = '<span class="highlight">'.$string.'</span>';
+			$to[$string] = $tag1.$string.$tag2;
 		}
 
 		return str_replace($from, $to, $text_cut);

@@ -12,17 +12,31 @@ mSearch2.panel.Home = function(config) {
 			,bodyStyle: 'padding: 10px'
 			,defaults: { border: false ,autoHeight: true }
 			,border: true
-			,activeItem: 0
 			,hideMode: 'offsets'
+			,stateful: true
+			,stateId: 'msearch2-home-tabpanel'
+			,stateEvents: ['tabchange']
+			,getState:function() {return {activeTab:this.items.indexOf(this.getActiveTab())};}
 			,items: [{
-				title: _('mse2_items')
+				title: _('mse2_tab_search')
 				,items: [{
-					html: _('mse2_intro_msg')
+					html: _('mse2_tab_search_intro')
 					,border: false
 					,bodyCssClass: 'panel-desc'
 					,bodyStyle: 'margin-bottom: 10px'
 				},{
-					xtype: 'msearch2-grid-items'
+					xtype: 'msearch2-grid-search'
+					,preventRender: true
+				}]
+			},{
+				title: _('mse2_tab_index')
+				,items: [{
+					html: _('mse2_tab_index_intro')
+					,border: false
+					,bodyCssClass: 'panel-desc'
+					,bodyStyle: 'margin-bottom: 10px'
+				},{
+					xtype: 'msearch2-form-index'
 					,preventRender: true
 				}]
 			}]

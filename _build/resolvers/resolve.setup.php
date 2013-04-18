@@ -18,7 +18,7 @@ switch ($options[xPDOTransport::PACKAGE_ACTION]) {
 		}
 
 		$path = MODX_CORE_PATH . 'components/msearch2/';
-		if (!file_exists($path .'/phpmorphy/dicts/installed')) {
+		if (!file_exists($path .'/phpmorphy/dicts/.installed')) {
 			if (!file_exists($path)) {
 				mkdir($path);
 				mkdir($path.'phpmorphy/');
@@ -46,7 +46,7 @@ switch ($options[xPDOTransport::PACKAGE_ACTION]) {
 			else {$modx->log(xPDO::LOG_LEVEL_ERROR, 'Could not extract dictionaries from '.$dst_en.' to '.$dicts.'. Error: '.$file->errorInfo());}
 
 			if ($ru && $en) {
-				file_put_contents($path . 'phpmorphy/dicts/installed', date('Y-m-d H:i:s'));
+				file_put_contents($path . 'phpmorphy/dicts/.installed', date('Y-m-d H:i:s'));
 			}
 		}
 
