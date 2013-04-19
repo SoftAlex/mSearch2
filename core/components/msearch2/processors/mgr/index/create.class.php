@@ -13,7 +13,7 @@ class mseIndexCreateProcessor extends modProcessor {
 	/** @var array $languageTopics An array of language topics to load */
 	public $languageTopics = array('msearch2:default');
 	/** @var string $permission The Permission to use when checking against */
-	public $permission = 'new_document';
+	public $permission = '';
 	/** @var mSearch2 $mSearch2 */
 	public $mSearch2;
 	protected $fields = array();
@@ -38,7 +38,7 @@ class mseIndexCreateProcessor extends modProcessor {
 	 * {@inheritDoc}
 	 */
 	public function process() {
-		$fields = $this->modx->getOption('mse2_index_fields', null, 'pagetitle:3,longtitle:3,description:2,introtext:2,content:2', true);
+		$fields = $this->modx->getOption('mse2_index_fields', null, 'pagetitle:3,longtitle:3,description:2,introtext:2,content:2,color:2', true);
 
 		// Preparing fields for indexing
 		$tmp = explode(',', preg_replace('/\s+/', '', $fields));
@@ -61,6 +61,11 @@ class mseIndexCreateProcessor extends modProcessor {
 		$i = 0;
 		/* @var modResource|Ticket|msProduct $resource */
 		foreach ($collection as $data) {
+			if ($data['deleted']) {
+				$this->unIndex($data['id']);
+				continue;
+			}
+
 			$class_key = $data['class_key'];
 			$resource = $this->modx->newObject($class_key);
 			$resource->fromArray($data, '', true, true);
@@ -100,8 +105,7 @@ class mseIndexCreateProcessor extends modProcessor {
 			array_keys($this->modx->getFieldMeta('modResource'))
 			,array_keys($this->fields)
 		);
-		if (!in_array('id', $select_fields)) {$select_fields[] = 'id';}
-		if (!in_array('class_key', $select_fields)) {$select_fields[] = 'class_key';}
+		$select_fields = array_unique(array_merge($select_fields, array('id','class_key','deleted')));
 
 		$c = $this->modx->newQuery('modResource');
 		$c->limit($limit, $offset);
@@ -129,7 +133,7 @@ class mseIndexCreateProcessor extends modProcessor {
 	 * @return xPDOQuery
 	 */
 	public function prepareQuery(xPDOQuery $c) {
-		$c->where(array('searchable' => 1, 'template:!=' => 0));
+		$c->where(array('searchable' => 1));
 
 		return $c;
 	}
@@ -184,6 +188,19 @@ class mseIndexCreateProcessor extends modProcessor {
 		if (!$q->execute()) {
 			$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Could not save search index of resource '.$resource_id.': '.print_r($q->errorInfo(),1));
 		}
+	}
+
+
+	/**
+	 * Remove index of resource
+	 *
+	 * @param integer $resource_id
+	 */
+	public function unIndex($resource_id) {
+		$sql = "DELETE FROM {$this->modx->getTableName('mseWord')} WHERE `resource` = '$resource_id';";
+		$sql .= "DELETE FROM {$this->modx->getTableName('mseIntro')} WHERE `resource` = '$resource_id';";
+
+		$this->modx->exec($sql);
 	}
 
 

@@ -3,6 +3,7 @@ Changelog for mSearch2.
 0.2.0
 ==============
 - Added manager pages
+- Added indexing plugin
 
 0.1.0
 ==============

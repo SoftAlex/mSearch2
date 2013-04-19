@@ -23,8 +23,8 @@ foreach ($tmp as $k => $v) {
 		,'name' => $k
 		,'description' => @$v['description']
 		,'snippet' => file_get_contents($sources['source_core'].'/elements/chunks/chunk.'.$v['file'].'.tpl')
-		,'static' => 1
-		,'static_file' => 'core/components/msearch2/elements/chunks/chunk.'.$v['file'].'.tpl'
+		//,'static' => 1
+		//,'static_file' => 'core/components/msearch2/elements/chunks/chunk.'.$v['file'].'.tpl'
 	),'',true,true);
 
 	$chunks[] = $chunk;

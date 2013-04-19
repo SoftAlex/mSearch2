@@ -27,7 +27,7 @@ class mseIndexUpdateProcessor extends mseIndexCreateProcessor {
 	 * @return xPDOQuery
 	 */
 	public function prepareQuery(xPDOQuery $c) {
-		$c->where(array('searchable' => 1, 'template:!=' => 0, 'id' => $this->getProperty('id')));
+		$c->where(array('searchable' => 1, 'id' => $this->getProperty('id')));
 
 		return $c;
 	}

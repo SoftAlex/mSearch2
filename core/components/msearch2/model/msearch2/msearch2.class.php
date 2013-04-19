@@ -285,8 +285,10 @@ class mSearch2 {
 		$pcre = $strict ? '[^а-яёa-z0-9]' : '';
 		foreach ($all_forms as $forms) {
 			foreach ($forms as $form) {
+				if (mb_strlen($form,'UTF-8') < $this->config['min_word_length']) {continue;}
+				$words[] = $form;
 				// Cutting text on first occurrence
-				if (empty($text_cut) && mb_strlen($form,'UTF-8') > $this->config['min_word_length'] && preg_match('/'.$form.$pcre.'/imu', $text, $matches)) {
+				if (empty($text_cut) && preg_match('/'.$form.$pcre.'/imu', $text, $matches)) {
 					$pos = mb_strpos($text, $matches[0], 0, 'UTF-8');
 					if ($pos >= $this->config['text_cut_before']) {
 						$text_cut = '... ';
@@ -299,12 +301,9 @@ class mSearch2 {
 					$text_cut .= mb_substr($text, $pos, $this->config['text_cut_after'], 'UTF-8');
 					if (mb_strlen($text,'UTF-8') > $this->config['text_cut_after']) {$text_cut .= ' ...';}
 
-					//var_dump($text_cut);die;
-
 					break;
 				}
 			}
-			$words = array_merge($words, $forms);
 		}
 
 		$pcre = $strict ? '(?:[а-яёa-z0-9]+|\s)' : '';
@@ -324,6 +323,7 @@ class mSearch2 {
 
 		return str_replace($from, $to, $text_cut);
 	}
+
 
 	/**
 	 * Recursive implode
