@@ -8,13 +8,21 @@
 $settings = array();
 
 $tmp = array(
-	/*
-	'some_setting' => array(
+	'index_fields' => array(
+		'xtype' => 'textarea'
+		,'value' => 'pagetitle:3,longtitle:3,description:2,introtext:2,content:2'
+		,'area' => 'mse2_main'
+	)
+	,'index_comments' => array(
 		'xtype' => 'combo-boolean'
 		,'value' => true
 		,'area' => 'mse2_main'
 	)
-	*/
+	,'index_comments_weight' => array(
+		'xtype' => 'numberfield'
+		,'value' => 1
+		,'area' => 'mse2_main'
+	)
 );
 
 foreach ($tmp as $k => $v) {

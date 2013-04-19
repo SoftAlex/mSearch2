@@ -45,6 +45,7 @@ class mSearch2 {
 			,'min_word_length' => 3
 			,'text_cut_before' => 50
 			,'text_cut_after' => 250
+			,'simpleSearch' => true
 		), $config);
 
 		if (!is_array($this->config['languages'])) {
@@ -100,6 +101,7 @@ class mSearch2 {
 					);
 				} catch (phpMorphy_Exception $e) {
 					$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Could not initialize phpMorphy for language .'.$lang.': .'.$e->getMessage());
+					return false;
 				}
 			}
 		}
@@ -130,8 +132,10 @@ class mSearch2 {
 
 			$bulk_words = array();
 			foreach ($words as $v) {
-				if (mb_strlen($v,'UTF-8') > $this->config['min_word_length'])
-					$bulk_words[] = mb_strtoupper($v, 'UTF-8');
+				if (mb_strlen($v,'UTF-8') > $this->config['min_word_length']) {
+					$word = mb_strtoupper($v, 'UTF-8');
+					$bulk_words[$word] = $word;
+				}
 			}
 
 			$this->loadPhpMorphy();
@@ -145,8 +149,8 @@ class mSearch2 {
 			$result = array();
 			foreach ($base_forms as $lang) {
 				if (!empty($lang)) {
-					foreach ($lang as $forms) {
-						if (!$forms) {$forms = $bulk_words;}
+					foreach ($lang as $word => $forms) {
+						if (!$forms) {$forms = array($word);}
 						foreach ($forms as $form) {
 							if (mb_strlen($form,'UTF-8') > $this->config['min_word_length']) {
 								$result[$form] = 1;
@@ -157,8 +161,6 @@ class mSearch2 {
 			}
 			$result = array_keys($result);
 		}
-
-
 
 		return $result;
 	}
@@ -184,7 +186,8 @@ class mSearch2 {
 			$bulk_words = array();
 			foreach ($words as $v) {
 				if (mb_strlen($v,'UTF-8') > $this->config['min_word_length']) {
-					$bulk_words[] = mb_strtoupper($v, 'UTF-8');
+					$word = mb_strtoupper($v, 'UTF-8');
+					$bulk_words[$word] = $word;
 				}
 			}
 
@@ -223,17 +226,45 @@ class mSearch2 {
 	 */
 	public function Search($query) {
 		$string = preg_replace('/[^_-а-яёa-z0-9\s\.]+/iu', ' ', $this->modx->stripTags($query));
-		$worms = $this->getBaseForms($string);
+		$words = $this->getBaseForms($string);
 
 		$result = array();
 		$q = $this->modx->newQuery('mseWord');
 		$q->select('`resource`, SUM(`weight`) as `weight`');
 		$q->groupby('`resource`');
-		$q->where(array('word:IN' => $worms));
+		$q->where(array('word:IN' => $words));
 		$q->sortby('weight','DESC');
 		if ($q->prepare() && $q->stmt->execute()) {
 			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
 				$result[$row['resource']] = $row['weight'];
+			}
+		}
+
+		if (empty($result) && $this->config['simpleSearch']) {
+			return $this->simpleSearch($query);
+		}
+
+		return $result;
+	}
+
+
+	/**
+	 * Search and return array with resources ids as a key and sum of weight as value
+	 *
+	 * @param $query
+	 *
+	 * @return array
+	 */
+	public function simpleSearch($query) {
+		$string = preg_replace('/[^_-а-яёa-z0-9\s\.]+/iu', ' ', $this->modx->stripTags($query));
+
+		$result = array();
+		$q = $this->modx->newQuery('mseIntro');
+		$q->select('`resource`');
+		$q->where(array('intro:LIKE' => '%'.$string.'%'));
+		if ($q->prepare() && $q->stmt->execute()) {
+			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
+				$result[$row['resource']] = 0;
 			}
 		}
 
@@ -244,14 +275,18 @@ class mSearch2 {
 	/**
 	 * Highlight of the string
 	 * */
-	function Highlight($text, $query, $tag1 = '<span class="highlight">', $tag2 = '</span>') {
-		$all_forms = $this->getAllForms($query);
+	function Highlight($text, $query, $strict = 1, $htag_open = '<b>', $htag_close = '</b>') {
+		$all_forms = array_merge(
+			array($query => preg_split('#\s|[,.:;!?"\'\\\/()]#', $query, -1, PREG_SPLIT_NO_EMPTY))
+			,$this->getAllForms($query)
+		);
 
 		$text_cut = ''; $words = array();
+		$pcre = $strict ? '[^а-яёa-z0-9]' : '';
 		foreach ($all_forms as $forms) {
 			foreach ($forms as $form) {
 				// Cutting text on first occurrence
-				if (empty($text_cut) && preg_match('/'.$form.'/imu', $text, $matches)) {
+				if (empty($text_cut) && mb_strlen($form,'UTF-8') > $this->config['min_word_length'] && preg_match('/'.$form.$pcre.'/imu', $text, $matches)) {
 					$pos = mb_strpos($text, $matches[0], 0, 'UTF-8');
 					if ($pos >= $this->config['text_cut_before']) {
 						$text_cut = '... ';
@@ -264,18 +299,27 @@ class mSearch2 {
 					$text_cut .= mb_substr($text, $pos, $this->config['text_cut_after'], 'UTF-8');
 					if (mb_strlen($text,'UTF-8') > $this->config['text_cut_after']) {$text_cut .= ' ...';}
 
+					//var_dump($text_cut);die;
+
 					break;
 				}
 			}
 			$words = array_merge($words, $forms);
 		}
 
-		preg_match_all('/(?:\s|)('.implode('|',$words).')[^а-яёa-z0-9]/imu', $text_cut, $matches);
+		$pcre = $strict ? '(?:[а-яёa-z0-9]+|\s)' : '';
+		preg_match_all('/(?:\s|)('.implode('|',$words).')'.$pcre.'/imu', $text_cut, $matches);
 		$from = $to = array();
+
 		foreach ($matches[0] as $v) {
-			$string = trim($v);
-			$from[$string] = $string;
-			$to[$string] = $tag1.$string.$tag2;
+			$from[$v] = $v;
+			$to[$v] = $htag_open.$v.$htag_close;
+		}
+		if (!empty($matches[1])) {
+			foreach ($matches[1] as $v) {
+				$from[$v] = $v;
+				$to[$v] = $htag_open.$v.$htag_close;
+			}
 		}
 
 		return str_replace($from, $to, $text_cut);

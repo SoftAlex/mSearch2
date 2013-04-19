@@ -11,7 +11,7 @@ $properties = array();
 $tmp = array(
 	'tpl' => array(
 		'type' => 'textfield'
-		,'value' => 'tpl.mSearch2.item'
+		,'value' => 'tpl.mSearch2.row'
 	)
 	,'returnIds' => array(
 		'type' => 'combo-boolean'

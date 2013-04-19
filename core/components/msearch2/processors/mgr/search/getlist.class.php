@@ -93,7 +93,8 @@ class mseIndexGetListProcessor extends modObjectGetListProcessor {
 
 	public function prepareArray(array $array) {
 		$array['weight'] = $this->ids[$array['id']];
-		$array['intro'] = $this->mSearch2->Highlight($array['intro'], $this->getProperty('query'), '<b>', '</b>');
+		$strict = !empty($array['weight']);
+		$array['intro'] = $this->mSearch2->Highlight($array['intro'], $this->getProperty('query'), $strict, '<b>', '</b>');
 
 		return $array;
 	}

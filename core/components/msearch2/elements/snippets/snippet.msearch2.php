@@ -14,6 +14,8 @@ if (empty($minQuery)) {$minQuery = 3;}
 if (empty($plPrefix)) {$plPrefix = 'mse2.';}
 if (empty($depth)) {$depth = 10;}
 if (empty($offset)) {$offset = 0;}
+if (empty($htag_open)) {$htag_open = '<span class="highlight">';}
+if (empty($htag_close)) {$htag_close = '</span>';}
 $returnIds = !empty($returnIds);
 $fastMode = !empty($fastMode);
 
@@ -145,8 +147,9 @@ $output = null; $offset++;
 if (!empty($rows) && is_array($rows)) {
 	foreach ($rows as $k => $row) {
 		// Processing main fields
-		$row['intro'] = $mSearch2->Highlight($row['intro'], $query);
 		$row['weight'] = $found[$row['id']];
+		$strict = !empty($row['weight']);
+		$row['intro'] = $mSearch2->Highlight($row['intro'], $query, $strict, $htag_open, $htag_close);
 		$row['num'] = $offset++;
 
 		// Processing quick fields

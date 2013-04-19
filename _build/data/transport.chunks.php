@@ -9,9 +9,9 @@
 $chunks = array();
 
 $tmp = array(
-	'tpl.mSearch2.item' => array(
-		'file' => 'item'
-		,'description' => 'Chunk for Items.'
+	'tpl.mSearch2.row' => array(
+		'file' => 'row'
+		,'description' => ''
 	)
 );
 

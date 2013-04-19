@@ -21,10 +21,10 @@ $_lang['mse2_err_no_results'] = 'No results found.';
 
 $_lang['mse2_search'] = 'Search on site';
 $_lang['mse2_search_clear'] = 'Clear';
+$_lang['mse2_intro'] = 'Preview';
+$_lang['mse2_weight'] = 'Weight';
 $_lang['mse2_show_unpublished'] = 'Unpublished';
 $_lang['mse2_show_deleted'] = 'Deleted';
-$_lang['mse2_resource_intro'] = 'Preview';
-$_lang['mse2_resource_weight'] = 'Weight';
 
 $_lang['mse2_index_create'] = 'Update index';
 $_lang['mse2_index_clear'] = 'Clear index';
@@ -32,3 +32,5 @@ $_lang['mse2_index_clear'] = 'Clear index';
 $_lang['mse2_index_total'] = 'Pages total';
 $_lang['mse2_index_indexed'] = 'Pages in index';
 $_lang['mse2_index_words'] = 'Words in index';
+$_lang['mse2_index_limit'] = 'Page limit for index';
+$_lang['mse2_index_offset'] = 'Page offset';

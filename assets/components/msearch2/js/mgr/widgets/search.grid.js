@@ -20,7 +20,7 @@ mSearch2.grid.Search = function(config) {
 		,columns: [this.exp
 			,{header: _('id'), dataIndex: 'id',width: 70}
 			,{header: _('pagetitle'), dataIndex: 'pagetitle', width: 150, renderer: this.renderPagetitle}
-			,{header: _('mse2_resource_weight'), dataIndex: 'weight', width: 50}
+			,{header: _('mse2_weight'), dataIndex: 'weight', width: 50}
 			,{header: _('published'), dataIndex: 'published', width: 50, renderer: this.renderPublished}
 			,{header: _('deleted'), dataIndex: 'deleted', width: 50, renderer: this.renderDeleted}
 		]

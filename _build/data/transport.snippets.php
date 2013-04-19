@@ -11,7 +11,7 @@ $snippets = array();
 $tmp = array(
 	'mSearch2' => array(
 		'file' => 'msearch2'
-		,'description' => 'Displays Items.'
+		,'description' => ''
 	)
 );
 
