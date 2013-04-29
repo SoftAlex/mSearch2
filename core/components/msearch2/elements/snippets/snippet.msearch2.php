@@ -152,20 +152,6 @@ if (!empty($rows) && is_array($rows)) {
 		$row['intro'] = $mSearch2->Highlight($row['intro'], $query, $strict, $htag_open, $htag_close);
 		$row['num'] = $offset++;
 
-		// Processing quick fields
-		if (!empty($tpl)) {
-			$pl = $pdoFetch->makePlaceholders($row);
-			$qfields = array_keys($pdoFetch->elements[$tpl]['placeholders']);
-			foreach ($qfields as $field) {
-				if (!empty($row[$field])) {
-					$row[$field] = str_replace($pl['pl'], $pl['vl'], $pdoFetch->elements[$tpl]['placeholders'][$field]);
-				}
-				else {
-					$row[$field] = '';
-				}
-			}
-		}
-
 		// Processing chunk
 		$output[] = empty($tpl)
 			? '<pre>'.str_replace(array('[',']','`'), array('&#91;','&#93;','&#96;'), htmlentities(print_r($row, true), ENT_QUOTES, 'UTF-8')).'</pre>'
