@@ -1,10 +1,4 @@
 <?php
-/**
- * Adds modActions and modMenus into package
- *
- * @package msearch2
- * @subpackage build
- */
 
 $menus = array();
 

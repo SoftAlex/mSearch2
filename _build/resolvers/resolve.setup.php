@@ -7,23 +7,34 @@ switch ($options[xPDOTransport::PACKAGE_ACTION]) {
 		/* @var modX $modx */
 		$modx = & $object->xpdo;
 		/* Checking and installing required packages */
-		foreach (array('pdoTools') as $package) {
-			if (!$modx->getObject('transport.modTransportPackage', array('package_name' => $package))) {
+		$packages = array(
+			'pdoTools' => array(
+				'version_major' => 1
+				,'version_minor' => 2
+			)
+		);
+
+		foreach ($packages as $package => $options) {
+			$query = array('package_name' => $package);
+			if (!empty($options)) {$query = array_merge($query, $options);}
+			if (!$modx->getObject('transport.modTransportPackage', $query)) {
 				$modx->log(modX::LOG_LEVEL_INFO, 'Trying to install <b>'.$package.'</b>. Please wait...');
+
 				$response = installPackage($package);
 				if ($response['success']) {$level = modX::LOG_LEVEL_INFO;}
 				else {$level = modX::LOG_LEVEL_ERROR;}
+
 				$modx->log($level, $response['message']);
 			}
 		}
 
 		$path = MODX_CORE_PATH . 'components/msearch2/';
 		if (!file_exists($path .'/phpmorphy/dicts/.installed')) {
-			if (!file_exists($path)) {
-				mkdir($path);
-				mkdir($path.'phpmorphy/');
-				mkdir($path.'phpmorphy/dicts/');
-			}
+			//if (!file_exists($path)) {
+				@mkdir($path);
+				@mkdir($path.'phpmorphy/');
+				@mkdir($path.'phpmorphy/dicts/');
+			//}
 
 			require MODX_CORE_PATH . 'xpdo/compression/pclzip.lib.php';
 			$dicts = $path.'phpmorphy/dicts/';
@@ -66,7 +77,10 @@ function installPackage($packageName) {
 	global $modx;
 
 	/* @var modTransportProvider $provider */
-	$provider = $modx->getObject('transport.modTransportProvider', 1);
+	if (!$provider = $modx->getObject('transport.modTransportProvider', array('service_url:LIKE' => '%simpledream%'))) {
+		$provider = $modx->getObject('transport.modTransportProvider', 1);
+	}
+
 	$provider->getClient();
 	$modx->getVersionData();
 	$productVersion = $modx->version['code_name'].'-'.$modx->version['full_version'];
@@ -85,38 +99,12 @@ function installPackage($packageName) {
 				$versionSignature = explode('.',$sig[1]);
 				$url = $foundPackage->location;
 
-				if (function_exists('curl_init')) {
-					$curl = curl_init($url);
-					curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-					curl_setopt($curl, CURLOPT_HEADER, false);
-					curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-					curl_setopt($curl, CURLOPT_AUTOREFERER, true);
-					curl_setopt($curl, CURLOPT_URL, $url);
-					curl_setopt($curl, CURLOPT_TIMEOUT, 10);
-					$file = curl_exec($curl);
-					$info = curl_getinfo($curl);
-					if ($file === false) {
-						return array(
-							'success' => 0
-							,'message' => 'Could not download package <b>'.$packageName.'</b>: '.curl_error($curl)
-						);
-					}
-					else if (empty($file) && !empty($info['redirect_url'])) {
-						curl_setopt($curl, CURLOPT_URL, $info['redirect_url']);
-						$file = curl_exec($curl);
-					}
-					curl_close($curl);
-				} else {
-					$file = file_get_contents($url);
-				}
-
-				if (empty($file)) {
+				if (!download($url, $modx->getOption('core_path').'packages/'.$foundPackage->signature.'.transport.zip')) {
 					return array(
 						'success' => 0
-						,'message' => 'Could not download package <b>'.$packageName.'</b>: Nothing to save'
+						,'message' => 'Could not download package <b>'.$packageName.'</b>.'
 					);
 				}
-				file_put_contents($modx->getOption('core_path').'packages/'.$foundPackage->signature.'.transport.zip',$file);
 
 				/* add in the package as an object so it can be upgraded */
 				/** @var modTransportPackage $package */
@@ -171,39 +159,29 @@ function installPackage($packageName) {
 }
 
 
-function download($src, $dst) {
-	if (function_exists('curl_init')) {
-		$curl = curl_init($src);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($curl, CURLOPT_HEADER, false);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($curl, CURLOPT_AUTOREFERER, true);
-		curl_setopt($curl, CURLOPT_URL, $src);
-		//curl_setopt($curl, CURLOPT_TIMEOUT, 10);
-		curl_setopt($curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-		$file = curl_exec($curl);
-		$info = curl_getinfo($curl);
-		if ($file === false) {
-			return array(
-				'success' => 0
-				,'message' => 'Could not download file from <b>'.$src.'</b>: '.curl_error($curl)
-			);
-		}
-		else if (empty($file) && !empty($info['redirect_url'])) {
-			curl_setopt($curl, CURLOPT_URL, $info['redirect_url']);
-			$file = curl_exec($curl);
-			if ($file === false) {
-				return array(
-					'success' => 0
-					,'message' => 'Could not download file from <b>'.$src.'</b>: '.curl_error($curl)
-				);
-			}
-		}
-		curl_close($curl);
-	} else {
-		$file = file_get_contents($src);
-	}
 
+function download($src, $dst) {
+	if (ini_get('allow_url_fopen')) {
+		$file = @file_get_contents($src);
+	}
+	else if (function_exists('curl_init')) {
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $src);
+		curl_setopt($ch, CURLOPT_HEADER, 0);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_TIMEOUT,180);
+		$safeMode = @ini_get('safe_mode');
+		$openBasedir = @ini_get('open_basedir');
+		if (empty($safeMode) && empty($openBasedir)) {
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		}
+
+		$file = curl_exec($ch);
+		curl_close($ch);
+	}
+	else {
+		return false;
+	}
 	file_put_contents($dst, $file);
 
 	return file_exists($dst);

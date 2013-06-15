@@ -1,10 +1,8 @@
 --------------------
 mSearch2
 --------------------
-Author: John Doe <john@doe.com>
+Author: Vasily Naumkin <bezumkin@yandex.ru>
 --------------------
 
-A basic Extra for MODx Revolution.
-
 Feel free to suggest ideas/improvements/bugs on GitHub:
-http://github.com/username/mSearch2/issues
+http://github.com/bezumkin/mSearch2/issues

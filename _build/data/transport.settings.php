@@ -1,27 +1,38 @@
 <?php
-/**
- * Loads system settings into build
- *
- * @package msearch2
- * @subpackage build
- */
+
 $settings = array();
 
 $tmp = array(
 	'index_fields' => array(
 		'xtype' => 'textarea'
-		,'value' => 'pagetitle:3,longtitle:3,description:2,introtext:2,content:2'
-		,'area' => 'mse2_main'
+		,'value' => 'content:3,description:2,introtext:2,pagetitle:3,longtitle:3'
+		,'area' => 'mse2_index'
 	)
 	,'index_comments' => array(
 		'xtype' => 'combo-boolean'
 		,'value' => true
-		,'area' => 'mse2_main'
+		,'area' => 'mse2_index'
 	)
 	,'index_comments_weight' => array(
 		'xtype' => 'numberfield'
 		,'value' => 1
-		,'area' => 'mse2_main'
+		,'area' => 'mse2_index'
+	)
+	,'index_min_words_length' => array(
+		'xtype' => 'numberfield'
+		,'value' => 3
+		,'area' => 'mse2_index'
+	)
+
+	,'search_exact_match_bonus' => array(
+		'xtype' => 'numberfield'
+		,'value' => 5
+		,'area' => 'mse2_search'
+	)
+	,'search_all_words_bonus' => array(
+		'xtype' => 'numberfield'
+		,'value' => 5
+		,'area' => 'mse2_search'
 	)
 );
 

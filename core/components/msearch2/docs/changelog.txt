@@ -1,5 +1,15 @@
 Changelog for mSearch2.
 
+0.3.0 beta-1
+==============
+- Fixed snippet offset bug
+
+0.3.0 beta
+==============
+- Improved search algorithm
+- Improved highlight of search results
+- Improved search snippet
+
 0.2.0
 ==============
 - Added manager pages

@@ -2,20 +2,18 @@
 /* @var mSearch2 $mSearch2 */
 $mSearch2 = $modx->getService('msearch2','mSearch2',$modx->getOption('msearch2.core_path',null,$modx->getOption('core_path').'components/msearch2/').'model/msearch2/',$scriptProperties);
 /* @var pdoFetch $pdoFetch */
-if (!empty($modx->services['pdofetch'])) {unset($modx->services['pdofetch']);}
 $pdoFetch = $modx->getService('pdofetch','pdoFetch', MODX_CORE_PATH.'components/pdotools/model/pdotools/',$scriptProperties);
-$pdoFetch->config['nestedChunkPrefix'] = 'msearch2_';
 $pdoFetch->addTime('pdoTools loaded.');
 
 $class = 'modResource';
 if (empty($queryVar)) {$queryVar = 'query';}
 if (empty($parentsVar)) {$parentsVar = 'parents';}
-if (empty($minQuery)) {$minQuery = 3;}
-if (empty($plPrefix)) {$plPrefix = 'mse2.';}
+if (empty($minQuery)) {$minQuery = $modx->getOption('index_min_words_length', null, 3, true);}
 if (empty($depth)) {$depth = 10;}
 if (empty($offset)) {$offset = 0;}
-if (empty($htag_open)) {$htag_open = '<span class="highlight">';}
-if (empty($htag_close)) {$htag_close = '</span>';}
+if (empty($htagOpen)) {$htagOpen = '<b>';}
+if (empty($htagClose)) {$htagClose = '</b>';}
+if (empty($outputSeparator)) {$outputSeparator = "\n";}
 $returnIds = !empty($returnIds);
 $fastMode = !empty($fastMode);
 
@@ -23,14 +21,14 @@ $query = @$_REQUEST[$queryVar];
 if (empty($query) && isset($_REQUEST[$queryVar])) {
 	return $modx->lexicon('mse2_err_no_query');
 }
-else if (strlen($query) < $minQuery && !empty($query)) {
+else if (mb_strlen($query,'UTF-8') < $minQuery && !empty($query)) {
 	return $modx->lexicon('mse2_err_min_query');
 }
 else if (empty($query)) {
 	return;
 }
 else {
-	$modx->setPlaceholder($plPrefix.'query', $query);
+	$modx->setPlaceholder('mse2_'.$queryVar, $query);
 }
 
 $found = $mSearch2->Search($query);
@@ -61,13 +59,16 @@ else if (!empty($_REQUEST[$parentsVar])) {
 }
 else {$parents = 0;}
 
-if (!empty($parents)) {
+if (!empty($parents) && $parents > 0) {
 	$pids = array_map('trim', explode(',', $parents));
 	$parents = $pids;
-	foreach ($pids as $v) {
-		if (!is_numeric($v)) {continue;}
-		$parents = array_merge($parents, $modx->getChildIds($v, $depth));
+	if (!empty($depth) && $depth > 0) {
+		foreach ($pids as $v) {
+			if (!is_numeric($v)) {continue;}
+			$parents = array_merge($parents, $modx->getChildIds($v, $depth));
+		}
 	}
+
 	if (!empty($parents)) {
 		$where['parent:IN'] = $parents;
 	}
@@ -80,6 +81,7 @@ if (!empty($scriptProperties['where'])) {
 		$where = array_merge($where, $tmp);
 	}
 }
+unset($scriptProperties['where']);
 $pdoFetch->addTime('"Where" expression built.');
 // End of building "Where" expression
 
@@ -87,27 +89,6 @@ $pdoFetch->addTime('"Where" expression built.');
 $leftJoin = array(
 	'{"class":"mseIntro","alias":"Intro","on":"`modResource`.`id`=`Intro`.`resource`"}'
 );
-
-// Include TVs
-$tvsLeftJoin = $tvsSelect = array();
-if (!empty($includeTVs)) {
-	$tvs = array_map('trim',explode(',',$includeTVs));
-	if(!empty($tvs[0])){
-		$q = $modx->newQuery('modTemplateVar', array('name:IN' => $tvs));
-		$q->select('id,name');
-		if ($q->prepare() && $q->stmt->execute()) {
-			$tv_ids = $q->stmt->fetchAll(PDO::FETCH_ASSOC);
-			if (!empty($tv_ids)) {
-				foreach ($tv_ids as $tv) {
-					$leftJoin[] = '{"class":"modTemplateVarResource","alias":"TV'.$tv['name'].'","on":"TV'.$tv['name'].'.contentid = '.$class.'.id AND TV'.$tv['name'].'.tmplvarid = '.$tv['id'].'"}';
-					$tvsSelect[] = ' "TV'.$tv['name'].'":"`TV'.$tv['name'].'`.`value` as `'.$tvPrefix.$tv['name'].'`" ';
-				}
-			}
-		}
-		$pdoFetch->addTime('Included list of tvs: <b>'.implode(', ',$tvs).'</b>.');
-	}
-}
-// End of including TVs
 
 // Fields to select
 $resourceColumns = !empty($includeContent) ?  $modx->getSelectColumns($class, $class) : $modx->getSelectColumns($class, $class, '', array('content'), true);
@@ -121,26 +102,21 @@ $default = array(
 	,'where' => $modx->toJSON($where)
 	,'leftJoin' => '['.implode(',',$leftJoin).']'
 	,'select' => '{'.implode(',',$select).'}'
-	,'sortby' => "find_in_set(`id`,'{$resources}')"
-	,'sortdir' => ''
+	,'sortby' => !empty($sortby) ? $sortby : "find_in_set(`id`,'{$resources}')"
+	,'sortdir' => !empty($sortdir) ? $sortdir : ''
 	//,'groupby' => $class.'.id'
 	,'fastMode' => $fastMode
 	,'return' => 'data'
+	,'nestedChunkPrefix' => 'msearch2_'
 );
 
 // Merge all properties and run!
-$pdoFetch->config = array_merge($pdoFetch->config, $default);
+$pdoFetch->setConfig(array_merge($default,$scriptProperties));
 $pdoFetch->addTime('Query parameters are prepared.');
 $rows = $pdoFetch->run();
 
-//echo '<pre>';print_r($rows);die;
-
 // Initializing chunk for template rows
-if (!empty($tpl)) {
-	$pdoFetch->getChunk($tpl);
-}
-
-$modificators = $modx->getOption('ms2_price_snippet', null, false, true) || $setting = $modx->getOption('ms2_weight_snippet', null, false, true);
+if (!empty($tpl)) {$pdoFetch->getChunk($tpl);}
 
 // Processing rows
 $output = null; $offset++;
@@ -148,9 +124,8 @@ if (!empty($rows) && is_array($rows)) {
 	foreach ($rows as $k => $row) {
 		// Processing main fields
 		$row['weight'] = $found[$row['id']];
-		$strict = !empty($row['weight']);
-		$row['intro'] = $mSearch2->Highlight($row['intro'], $query, $strict, $htag_open, $htag_close);
-		$row['num'] = $offset++;
+		$row['intro'] = $mSearch2->Highlight($row['intro'], $query, $htagOpen, $htagClose);
+		$row['idx'] = $offset++;
 
 		// Processing chunk
 		$output[] = empty($tpl)
@@ -158,14 +133,13 @@ if (!empty($rows) && is_array($rows)) {
 			: $pdoFetch->getChunk($tpl, $row, $pdoFetch->config['fastMode']);
 	}
 	$pdoFetch->addTime('Returning processed chunks');
-	if (empty($outputSeparator)) {$outputSeparator = "\n";}
 	if (!empty($output)) {
 		$output = implode($outputSeparator, $output);
 	}
 }
 
 if ($modx->user->hasSessionContext('mgr') && !empty($showLog)) {
-	$output .= '<pre class="msProductsLog">' . print_r($pdoFetch->getTime(), 1) . '</pre>';
+	$output .= '<pre class="mSearchLog">' . print_r($pdoFetch->getTime(), 1) . '</pre>';
 }
 
 // Return output

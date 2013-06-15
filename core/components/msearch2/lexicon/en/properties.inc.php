@@ -23,6 +23,16 @@ $_lang['mse2_prop_includeTVs'] = 'An optional comma-delimited list of TemplateVa
 $_lang['mse2_prop_tvPrefix'] = 'The prefix for TemplateVar properties, "tv." for example. By default it is empty.';
 
 $_lang['mse2_prop_where'] = 'A JSON-style expression of criteria to build any additional where clauses from.';
-$_lang['mse2_prop_showDeleted'] = 'Show deleted goods.';
-$_lang['mse2_prop_showHidden'] = 'Show goods, that hidden in menu.';
-$_lang['mse2_prop_showZeroPrice'] = 'Show goods with zero price.';
+$_lang['mse2_prop_showUnpublished'] = 'Show unpublished resources.';
+$_lang['mse2_prop_showDeleted'] = 'Show deleted resources.';
+$_lang['mse2_prop_showHidden'] = 'Show resources, that hidden in menu.';
+
+$_lang['mse2_prop_introCutBefore'] = 'Specify the number of characters to be output in placeholder [[+intro]] before the first match in the text. The default value of "50".';
+$_lang['mse2_prop_introCutAfter'] = 'Specify the number of characters to be output in placeholder [[+intro]] after the first match in the text. Default - "250".';
+
+$_lang['mse2_prop_htagOpen'] = 'The opening tag for the highlight of found results in [[+intro]].';
+$_lang['mse2_prop_htagClose'] = 'Closing tag for the highlight of found results in [[+intro]].';
+
+$_lang['mse2_prop_minQuery'] = 'The minimum length of a search query.';
+$_lang['mse2_prop_parentsVar'] = 'The name of the variable to additional filter by parents. Default is "parents", can be send with $_REQUEST.';
+$_lang['mse2_prop_queryVar'] = 'The name of the variable of search query to get it from $_REQUEST. Default is "query"';

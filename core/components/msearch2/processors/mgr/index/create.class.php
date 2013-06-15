@@ -38,7 +38,7 @@ class mseIndexCreateProcessor extends modProcessor {
 	 * {@inheritDoc}
 	 */
 	public function process() {
-		$fields = $this->modx->getOption('mse2_index_fields', null, 'pagetitle:3,longtitle:3,description:2,introtext:2,content:2,color:2', true);
+		$fields = $this->modx->getOption('mse2_index_fields', null, 'content:3,description:2,introtext:2,pagetitle:3,longtitle:3', true);
 
 		// Preparing fields for indexing
 		$tmp = explode(',', preg_replace('/\s+/', '', $fields));

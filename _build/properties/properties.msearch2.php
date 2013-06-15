@@ -73,6 +73,31 @@ $tmp = array(
 		'type' => 'combo-boolean'
 		,'value' => true
 	)
+	,'introCutBefore' => array(
+		'type' => 'numberfield'
+		,'value' => 50
+	)
+	,'introCutAfter' => array(
+		'type' => 'numberfield'
+		,'value' => 250
+	)
+	,'htagOpen' => array(
+		'type' => 'textfield'
+		,'value' => '<b>'
+	)
+	,'htagClose' => array(
+		'type' => 'textfield'
+		,'value' => '</b>'
+	)
+	,'parentsVar' => array(
+		'type' => 'textfield'
+		,'value' => 'parents'
+	)
+	,'queryVar' => array(
+		'type' => 'textfield'
+		,'value' => 'query'
+	)
+
 );
 
 foreach ($tmp as $k => $v) {
