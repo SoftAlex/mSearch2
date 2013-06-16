@@ -34,3 +34,6 @@ $_lang['mse2_index_indexed'] = 'Проиндексировано страниц'
 $_lang['mse2_index_words'] = 'Проиндексировано слов';
 $_lang['mse2_index_limit'] = 'Индексировать по n страниц';
 $_lang['mse2_index_offset'] = 'Пропустить от начала';
+
+$_lang['mse2_filter_boolean_yes'] = 'Да';
+$_lang['mse2_filter_boolean_no'] = 'Нет';

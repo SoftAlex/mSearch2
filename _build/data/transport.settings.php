@@ -34,6 +34,11 @@ $tmp = array(
 		,'value' => 5
 		,'area' => 'mse2_search'
 	)
+	,'filters_handler_class' => array(
+		'xtype' => 'textfield'
+		,'value' => 'mse2FiltersHandler'
+		,'area' => 'mse2_filters'
+	)
 );
 
 foreach ($tmp as $k => $v) {

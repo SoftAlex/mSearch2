@@ -23,3 +23,6 @@ $_lang['setting_mse2_search_exact_match_bonus'] = 'Bonus for an exact match';
 $_lang['setting_mse2_search_exact_match_bonus_desc'] = 'Specify the number of points added for an exact match the search phrase and the result. Default is "5".';
 $_lang['setting_mse2_search_all_words_bonus'] = 'Bonus for the match whole words';
 $_lang['setting_mse2_search_all_words_bonus_desc'] = 'If a search request consists of several words, and all of them were found in the resource - will assigned extra points. Default is "5".';
+
+$_lang['setting_mse2_filters_handler_class'] = 'Filters handler class';
+$_lang['setting_mse2_filters_handler_class_desc'] = 'The name of the class that implements the logic of a filters. Default is "mse2FiltersHandler".';

@@ -23,3 +23,6 @@ $_lang['setting_mse2_search_exact_match_bonus'] = 'Балл за точное с
 $_lang['setting_mse2_search_exact_match_bonus_desc'] = 'Укажите, сколько баллов добавлять за точное совпадение поисковой фразы и содержимого страницы. По умолчанию - "5".';
 $_lang['setting_mse2_search_all_words_bonus'] = 'Бал за совпадение по всем словам';
 $_lang['setting_mse2_search_all_words_bonus_desc'] = 'Если поисковый запрос состоит из нескольких слов, и все они были найдены в ресурсе - ему присваиваются дополнительные очки. По умолчанию - "5".';
+
+$_lang['setting_mse2_filters_handler_class'] = 'Класс-обработчик фильтров';
+$_lang['setting_mse2_filters_handler_class_desc'] = 'Имя класса, который реализует логику работы фильтров. По умолчанию - "mse2FiltersHandler".';

@@ -10,7 +10,8 @@ class mSearch2 {
 	public $modx;
 	/* @var mSearch2ControllerRequest $request */
 	protected $request;
-	//public $initialized = array();
+	/* @var mse2FiltersHandler $filtersHandler */
+	protected $filtersHandler = array();
 	public $phpMorphy = array();
 
 
@@ -26,6 +27,7 @@ class mSearch2 {
 			,'cssUrl' => $assetsUrl.'css/'
 			,'jsUrl' => $assetsUrl.'js/'
 			,'imagesUrl' => $assetsUrl.'images/'
+			,'customPath' => $corePath.'custom/'
 
 			,'connectorUrl' => $connectorUrl
 
@@ -80,6 +82,22 @@ class mSearch2 {
 		}
 
 		return true;
+	}
+
+
+	/**
+	 * Method loads custom classes from specified directory
+	 *
+	 * @var string $dir Directory for load classes
+	 * @return void
+	 */
+	public function loadCustomClasses($dir) {
+		$files = scandir($this->config['customPath'] . $dir);
+		foreach ($files as $file) {
+			if (preg_match('/.*?\.class\.php$/i', $file)) {
+				include_once($this->config['customPath'] . $dir . '/' . $file);
+			}
+		}
 	}
 
 
@@ -381,4 +399,84 @@ class mSearch2 {
 		return implode($glue, $result);
 	}
 
+
+	/**
+	 * @param array|string $ids
+	 *
+	 * @return array
+	 */
+	public function getFilters($ids) {
+		/*
+		if ($filters = $this->modx->cacheManager->get('msearch2/fltr_' . md5($ids))) {
+			return $filters;
+		}
+		*/
+
+		if (!is_object($this->filtersHandler)) {
+			require_once 'filters.class.php';
+			$filters_class = $this->modx->getOption('mse2_filters_handler_class', null, 'mse2FiltersHandler', true);
+			if ($filters_class != 'mse2FiltersHandler') {$this->loadCustomClasses('filters');}
+			if (!class_exists($filters_class)) {$filters_class = 'mse2FiltersHandler';}
+
+			$this->filtersHandler = new $filters_class($this, $this->config);
+			if (!($this->filtersHandler instanceof mse2FiltersHandler)) {
+				$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Could not initialize filters handler class: "'.$filters_class.'"');
+				return false;
+			}
+		}
+
+		if (!is_array($ids)) {
+			$ids = array_map('trim', explode(',', $ids));
+		}
+		if (empty($ids)) {return 'mSearch2 error: No ids given!';}
+
+		$tmp_filters = array_map('trim', explode(',', $this->config['filters']));
+		$filters = $order = array();
+
+		// Preparing filters
+		foreach ($tmp_filters as $v) {
+			$v = strtolower($v);
+			if (strpos($v, '::') !== false) {
+				@list($table, $filter) = explode('::', $v);
+			}
+			else {
+				$table = 'resource';
+				$filter = $v;
+			}
+
+			$tmp = explode(':',$filter);
+			$filters[$table][$tmp[0]] = array();
+			$order[$table.'::'.$tmp[0]] = !empty($tmp[1]) ? $tmp[1] : 'default';
+		}
+
+		// Retrieving filters
+		foreach ($filters as $table => &$fields) {
+			$method = 'get'.ucfirst($table).'Values';
+			if (method_exists($this->filtersHandler, $method)) {
+				$fields = call_user_func_array(array($this->filtersHandler, $method), array(array_keys($fields), $ids));
+			}
+			else {
+				$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Method "'.$method.'" not exists in class "'.get_class($this->filtersHandler).'". Could not retrieve filters from "'.$table.'"');
+			}
+		}
+
+		// Building filters
+		foreach ($order as $filter => &$value) {
+			list($table, $filter) = explode('::', $filter);
+			$values = $filters[$table][$filter];
+
+			$method = 'build'.ucfirst($value).'Filter';
+			if (method_exists($this->filtersHandler, $method)) {
+				$value = call_user_func_array(array($this->filtersHandler, $method), array($values));
+			}
+			else {
+				$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Method "'.$method.'" not exists in class "'.get_class($this->filtersHandler).'". Could not build filter "'.$table.'::'.$filter.'"');
+				$value = $values;
+			}
+		}
+
+		//$this->modx->cacheManager->set('msearch2/fltr_' . md5($ids), $filters, 1800);
+
+		return $order;
+	}
 }

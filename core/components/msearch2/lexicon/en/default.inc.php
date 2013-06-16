@@ -34,3 +34,6 @@ $_lang['mse2_index_indexed'] = 'Pages in index';
 $_lang['mse2_index_words'] = 'Words in index';
 $_lang['mse2_index_limit'] = 'Page limit for index';
 $_lang['mse2_index_offset'] = 'Page offset';
+
+$_lang['mse2_filter_boolean_yes'] = 'Yes';
+$_lang['mse2_filter_boolean_no'] = 'No';
