@@ -49,6 +49,8 @@ class mSearch2 {
 			,'all_words_bonus' => $this->modx->getOption('mse2_search_all_words_bonus', null, 5, true)
 			,'introCutBefore' => 50
 			,'introCutAfter' => 250
+			,'filter_delimeter' => '/'
+			,'method_delimeter' => ':'
 		), $config);
 
 		if (!is_array($this->config['languages'])) {
@@ -436,17 +438,17 @@ class mSearch2 {
 		// Preparing filters
 		foreach ($tmp_filters as $v) {
 			$v = strtolower($v);
-			if (strpos($v, '::') !== false) {
-				@list($table, $filter) = explode('::', $v);
+			if (strpos($v, $this->config['filter_delimeter']) !== false) {
+				@list($table, $filter) = explode($this->config['filter_delimeter'], $v);
 			}
 			else {
 				$table = 'resource';
 				$filter = $v;
 			}
 
-			$tmp = explode(':',$filter);
+			$tmp = explode($this->config['method_delimeter'], $filter);
 			$filters[$table][$tmp[0]] = array();
-			$order[$table.'::'.$tmp[0]] = !empty($tmp[1]) ? $tmp[1] : 'default';
+			$order[$table.$this->config['filter_delimeter'].$tmp[0]] = !empty($tmp[1]) ? $tmp[1] : 'default';
 		}
 
 		// Retrieving filters
@@ -462,7 +464,7 @@ class mSearch2 {
 
 		// Building filters
 		foreach ($order as $filter => &$value) {
-			list($table, $filter) = explode('::', $filter);
+			list($table, $filter) = explode($this->config['filter_delimeter'], $filter);
 			$values = $filters[$table][$filter];
 
 			$method = 'build'.ucfirst($value).'Filter';
@@ -470,7 +472,7 @@ class mSearch2 {
 				$value = call_user_func_array(array($this->filtersHandler, $method), array($values));
 			}
 			else {
-				$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Method "'.$method.'" not exists in class "'.get_class($this->filtersHandler).'". Could not build filter "'.$table.'::'.$filter.'"');
+				$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Method "'.$method.'" not exists in class "'.get_class($this->filtersHandler).'". Could not build filter "'.$table.$this->config['filter_delimeter'].$filter.'"');
 				$value = $values;
 			}
 		}
