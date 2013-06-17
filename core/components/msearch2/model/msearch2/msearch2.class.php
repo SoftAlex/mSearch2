@@ -13,6 +13,7 @@ class mSearch2 {
 	/* @var mse2FiltersHandler $filtersHandler */
 	public $filtersHandler = array();
 	public $phpMorphy = array();
+	public $initialized = array();
 
 
 	function __construct(modX &$modx,array $config = array()) {
@@ -20,6 +21,7 @@ class mSearch2 {
 
 		$corePath = $this->modx->getOption('msearch2.core_path', $config, $this->modx->getOption('core_path').'components/msearch2/');
 		$assetsUrl = $this->modx->getOption('msearch2.assets_url', $config, $this->modx->getOption('assets_url').'components/msearch2/');
+		$actionUrl = $this->modx->getOption('minishop2.action_url', $config, $assetsUrl.'action.php');
 		$connectorUrl = $assetsUrl.'connector.php';
 
 		$this->config = array_merge(array(
@@ -30,6 +32,7 @@ class mSearch2 {
 			,'customPath' => $corePath.'custom/'
 
 			,'connectorUrl' => $connectorUrl
+			,'actionUrl' => $actionUrl
 
 			,'corePath' => $corePath
 			,'modelPath' => $corePath.'model/'
@@ -70,7 +73,7 @@ class mSearch2 {
 	 *
 	 * @return boolean
 	 */
-	public function initialize($ctx = 'web') {
+	public function initialize($ctx = 'web', $scriptProperties = array()) {
 		switch ($ctx) {
 			case 'mgr':
 				if (!$this->modx->loadClass('msearch2.request.mSearch2ControllerRequest', $this->config['modelPath'], true, true)) {
@@ -80,7 +83,41 @@ class mSearch2 {
 				return $this->request->handleRequest();
 			break;
 			default:
+				$this->config = array_merge($this->config, $scriptProperties);
+				$this->config['ctx'] = $ctx;
+				if (!empty($this->initialized[$ctx])) {
+					return true;
+				}
 
+				if (!defined('MODX_API_MODE') || !MODX_API_MODE) {
+					$config = $this->makePlaceholders($this->config);
+					if ($css = $this->modx->getOption('mse2_frontend_css')) {
+						$this->modx->regClientCSS(str_replace($config['pl'], $config['vl'], $css));
+					}
+					if ($js = trim($this->modx->getOption('mse2_frontend_js'))) {
+						$this->modx->regClientStartupScript(str_replace('					', '', '
+						<script type="text/javascript">
+						mSearch2Config = {
+							cssUrl: "'.$this->config['cssUrl'].'web/"
+							,jsUrl: "'.$this->config['jsUrl'].'web/"
+							,actionUrl: "'.$this->config['actionUrl'].'"
+						};
+						</script>
+					'), true);
+						if (!empty($js) && preg_match('/\.js$/i', $js)) {
+							$this->modx->regClientScript(str_replace('							', '', '
+							<script type="text/javascript">
+							if(typeof jQuery == "undefined") {
+								document.write("<script src=\"'.$this->config['jsUrl'].'web/lib/jquery.min.js\" type=\"text/javascript\"><\/script>");
+							}
+							</script>
+							'), true);
+							$this->modx->regClientScript(str_replace($config['pl'], $config['vl'], $js));
+						}
+					}
+				}
+
+				$this->initialized[$ctx] = true;
 		}
 
 		return true;
@@ -339,30 +376,36 @@ class mSearch2 {
 	 * @return mixed
 	 */
 	function Highlight($text, $query, $htag_open = '<b>', $htag_close = '</b>') {
-		$all_forms = array_merge(
+		$tmp = array_merge(
 			array($query => preg_split('#\s|[,.:;!?"\'\\\/()]#', $query, -1, PREG_SPLIT_NO_EMPTY))
 			,$this->getAllForms($query)
 		);
 
-		$text_cut = ''; $words = array();
-		foreach ($all_forms as $forms) {
-			foreach ($forms as $form) {
-				if (mb_strlen($form,'UTF-8') < $this->config['min_word_length']) {continue;}
-				$words[] = $form;
-				// Cutting text on first occurrence
-				if (empty($text_cut) && preg_match('/\b'.$form.'\b/imu', $text, $matches)) {
-					$pos = mb_strpos($text, $matches[0], 0, 'UTF-8');
-					if ($pos >= $this->config['introCutBefore']) {
-						$text_cut = '... ';
-						$pos -= $this->config['introCutBefore'];
-					}
-					else {
-						$text_cut = '';
-						$pos = 0;
-					}
-					$text_cut .= mb_substr($text, $pos, $this->config['introCutAfter'], 'UTF-8');
-					if (mb_strlen($text,'UTF-8') > $this->config['introCutAfter']) {$text_cut .= ' ...';}
+		$words = array_keys($tmp);
+		foreach ($tmp as $v) {
+			$words = array_merge($words, array_values($v));
+		}
+
+		$text_cut = '';
+		foreach ($words as $key => $word) {
+			if (mb_strlen($word,'UTF-8') < $this->config['min_word_length']) {
+				unset($words[$key]);
+				continue;
+			}
+
+			// Cutting text on first occurrence
+			if (empty($text_cut) && preg_match('/\b'.$word.'\b/imu', $text, $matches)) {
+				$pos = mb_strpos($text, $matches[0], 0, 'UTF-8');
+				if ($pos >= $this->config['introCutBefore']) {
+					$text_cut = '... ';
+					$pos -= $this->config['introCutBefore'];
 				}
+				else {
+					$text_cut = '';
+					$pos = 0;
+				}
+				$text_cut .= mb_substr($text, $pos, $this->config['introCutAfter'], 'UTF-8');
+				if (mb_strlen($text,'UTF-8') > $this->config['introCutAfter']) {$text_cut .= ' ...';}
 			}
 		}
 
@@ -488,5 +531,30 @@ class mSearch2 {
 		//$this->modx->cacheManager->set('msearch2/fltr_' . md5($ids), $filters, 1800);
 
 		return $order;
+	}
+
+
+	/**
+	 * Method for transform array to placeholders
+	 *
+	 * @var array $array With keys and values
+	 *
+	 * @return array $array Two nested arrays With placeholders and values
+	 */
+	public function makePlaceholders(array $array = array(), $prefix = '') {
+		$result = array(
+			'pl' => array()
+			,'vl' => array()
+		);
+		foreach ($array as $k => $v) {
+			if (is_array($v)) {
+				$result = array_merge_recursive($result, $this->makePlaceholders($v, $k.'.'));
+			}
+			else {
+				$result['pl'][$prefix.$k] = '[[+'.$prefix.$k.']]';
+				$result['vl'][$prefix.$k] = $v;
+			}
+		}
+		return $result;
 	}
 }
