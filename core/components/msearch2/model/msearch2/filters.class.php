@@ -131,8 +131,19 @@ class mse2FiltersHandler {
 		if (count($values) < 2 && empty($this->config['showEmptyFilters'])) {
 			return array();
 		}
+
+		$results = array();
 		ksort($values);
-		return $values;
+		foreach ($values as $value => $ids) {
+			$results[] = array(
+				'title' => $value
+				,'value' => $value
+				,'type' => 'default'
+				,'resources' => $ids
+			);
+		}
+
+		return $results;
 	}
 
 
@@ -145,25 +156,34 @@ class mse2FiltersHandler {
 	 * @return array Prepared values
 	 */
 	public function buildNumberFilter(array $values) {
-		$values = array_keys($values);
-
-		if (empty($values) || (count($values) < 2 && empty($this->config['showEmptyFilters']))) {
+		$tmp = array_keys($values);
+		if (empty($values) || (count($tmp) < 2 && empty($this->config['showEmptyFilters']))) {
 			return array();
 		}
 
-		sort($values);
+		sort($tmp);
 		if (count($values) >= 2) {
-			return array(
-				'min' => array_shift($values)
-				,'max' => array_pop($values)
-			);
+			$min = array_shift($tmp);
+			$max = array_pop($tmp);
 		}
 		else {
-			return array(
-				'min' => $values[0]
-				,'max' => $values[0]
-			);
+			$min = $max = $tmp[0];
 		}
+
+		return array(
+			array(
+				'title' => $this->modx->lexicon('mse2_filter_number_min')
+				,'value' => $min
+				,'type' => 'number'
+				,'resources' => null
+			)
+			,array(
+				'title' => $this->modx->lexicon('mse2_filter_number_max')
+				,'value' => $max
+				,'type' => 'number'
+				,'resources' => null
+			)
+		);
 	}
 
 
@@ -177,11 +197,11 @@ class mse2FiltersHandler {
 	 */
 	public function buildVendorFilter(array $values) {
 		$vendors = array_keys($values);
-		$results = array();
 		if (empty($vendors) || (count($vendors) < 2 && empty($this->config['showEmptyFilters']))) {
 			return array();
 		}
 
+		$results = array();
 		$q = $this->modx->newQuery('msVendor', array('id:IN' => $vendors));
 		$q->select('id,name');
 		if ($q->prepare() && $q->stmt->execute()) {
@@ -191,14 +211,12 @@ class mse2FiltersHandler {
 			}
 
 			foreach ($values as $vendor => $ids) {
-				if (!isset($vendors[$vendor])) {
-					$vendor = $this->modx->lexicon('mse2_filter_boolean_no');
-				}
-				else {
-					$vendor = $vendors[$vendor];
-				}
-
-				$results[$vendor] = $ids;
+				$results[] = array(
+					'title' => !isset($vendors[$vendor]) ? $this->modx->lexicon('mse2_filter_boolean_no') : $vendors[$vendor]
+					,'value' => $vendor
+					,'type' => 'vendor'
+					,'resources' => $ids
+				);
 			}
 		}
 
@@ -215,14 +233,18 @@ class mse2FiltersHandler {
 	 * @return array Prepared values
 	 */
 	public function buildBooleanFilter(array $values) {
-		$results = array();
 		if (count($values) < 2 && empty($this->config['showEmptyFilters'])) {
 			return array();
 		}
 
-		foreach ($values as $key => $ids) {
-			$key = empty($key) ? $this->modx->lexicon('mse2_filter_boolean_no') : $this->modx->lexicon('mse2_filter_boolean_yes');
-			$results[$key] = $ids;
+		$results = array();
+		foreach ($values as $value => $ids) {
+			$results[] = array(
+				'title' => empty($value) ? $this->modx->lexicon('mse2_filter_boolean_no') : $this->modx->lexicon('mse2_filter_boolean_yes')
+				,'value' => $value
+				,'type' => 'boolean'
+				,'resources' => $ids
+			);
 		}
 
 		return $results;

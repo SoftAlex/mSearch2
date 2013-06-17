@@ -11,7 +11,7 @@ class mSearch2 {
 	/* @var mSearch2ControllerRequest $request */
 	protected $request;
 	/* @var mse2FiltersHandler $filtersHandler */
-	protected $filtersHandler = array();
+	public $filtersHandler = array();
 	public $phpMorphy = array();
 
 
@@ -430,7 +430,7 @@ class mSearch2 {
 		if (!is_array($ids)) {
 			$ids = array_map('trim', explode(',', $ids));
 		}
-		if (empty($ids)) {return 'mSearch2 error: No ids given!';}
+		if (empty($ids)) {return false;}
 
 		$tmp_filters = array_map('trim', explode(',', $this->config['filters']));
 		$filters = $order = array();
@@ -454,8 +454,16 @@ class mSearch2 {
 		// Retrieving filters
 		foreach ($filters as $table => &$fields) {
 			$method = 'get'.ucfirst($table).'Values';
+			$keys = array_keys($fields);
 			if (method_exists($this->filtersHandler, $method)) {
 				$fields = call_user_func_array(array($this->filtersHandler, $method), array(array_keys($fields), $ids));
+
+				foreach ($keys as $key) {
+					if (!isset($fields[$key])) {
+						$fields[$key] = array();
+					}
+				}
+
 			}
 			else {
 				$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Method "'.$method.'" not exists in class "'.get_class($this->filtersHandler).'". Could not retrieve filters from "'.$table.'"');
