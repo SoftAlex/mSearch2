@@ -30,6 +30,7 @@ $mSearch2 = $modx->getService('msearch2','mSearch2', MODX_CORE_PATH.'components/
 $mSearch2->initialize($modx->context->key);
 /* @var pdoFetch $pdoFetch */
 $pdoFetch = $modx->getService('pdofetch','pdoFetch', MODX_CORE_PATH.'components/pdotools/model/pdotools/', $config);
+$pdoFetch->addTime('pdoTools loaded.');
 
 switch ($action) {
 	case 'filter':
@@ -43,8 +44,15 @@ switch ($action) {
 			$paginatorProperties['sortdir'] = '';
 		}
 
+		$pdoFetch->addTime('Getting filters for saved ids: ('.$paginatorProperties['resources'].')');
 		$ids = $mSearch2->Filter($paginatorProperties['resources'], $_REQUEST);
+		$pdoFetch->addTime('Filters retrieved.');
 		$suggestions = $mSearch2->getSuggestions($paginatorProperties['resources'], $_REQUEST, $ids);
+		$pdoFetch->addTime('Suggestions retrieved.');
+
+		// Saving log
+		$log = $pdoFetch->timings;
+		$pdoFetch->timings = array();
 
 		if (!empty($ids)) {
 			$paginatorProperties['resources'] = is_array($ids) ? implode(',', $ids) : $ids;
@@ -68,6 +76,7 @@ switch ($action) {
 			$results = $pagination = '';
 		}
 
+		$pdoFetch->timings = $log;
 		$response = array(
 			'success' => true
 			,'message' => ''
@@ -76,6 +85,7 @@ switch ($action) {
 				,'pagination' => $pagination
 				,'total' => empty($total) ? 0 : $total
 				,'suggestions' => $suggestions
+				,'log' => ($modx->user->hasSessionContext('mgr') && !empty($config['showLog'])) ? print_r($pdoFetch->getTime(), 1) : ''
 			)
 		);
 		$response = $modx->toJSON($response);

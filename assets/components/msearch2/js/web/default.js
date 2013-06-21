@@ -101,6 +101,9 @@ mSearch2 = {
 				mSearch2.pagination.html(response.data.pagination);
 				mSearch2.setTotal(response.data.total);
 				mSearch2.setSuggestions(response.data.suggestions);
+				if (response.data.log) {
+					$('.mFilterLog').html(response.data.log);
+				}
 			}
 			else {
 				mSearch2.Message.error(response.message);
