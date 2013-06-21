@@ -11,8 +11,18 @@ class mse2FiltersHandler {
 		$this->modx =& $mse2->modx;
 		$this->mse2 =& $mse2;
 
+		if (!empty($config['sortAliases']) && !is_array($config['sortAliases'])) {
+			$config['sortAliases'] = $this->modx->fromJSON($config['sortAliases']);
+		}
 		$this->config = array_merge(array(
-
+			'sortAliases' => array(
+				'ms' => 'Data'
+				,'ms_data' => 'Data'
+				,'ms_product' => 'msProduct'
+				,'ms_vendor' => 'Vendor'
+				,'tv' => 'TV'
+				,'resource' => !empty($config['class']) && strtolower($config['class']) == 'msproduct' ? 'msProduct' : 'modResource'
+			)
 		), $config);
 	}
 
@@ -195,7 +205,7 @@ class mse2FiltersHandler {
 	 *
 	 * @return array Prepared values
 	 */
-	public function buildVendorFilter(array $values) {
+	public function buildVendorsFilter(array $values) {
 		$vendors = array_keys($values);
 		if (empty($vendors) || (count($vendors) < 2 && empty($this->config['showEmptyFilters']))) {
 			return array();
@@ -248,6 +258,174 @@ class mse2FiltersHandler {
 		}
 
 		return $results;
+	}
+
+
+	/**
+	 * Prepares values for filter
+	 * Returns array with human-readable parents of resources
+	 *
+	 * @param array $values
+	 *
+	 * @return array Prepared values
+	 */
+	public function buildParentsFilter(array $values, $depth = 1) {
+		if (count($values) < 2 && empty($this->config['showEmptyFilters'])) {
+			return array();
+		}
+
+		ksort($values);
+		$results = $parents = array();
+		foreach ($values as $value => $ids) {
+			$pids = array($value);
+			$pids = array_merge($pids, $this->modx->getParentIds($value, $depth));
+
+			$query = array();
+			foreach ($pids as $v) {
+				if (!isset($parents[$v])) {
+					$query[] = $v;
+				}
+			}
+
+			$q = $this->modx->newQuery('modResource', array('id:IN' => $query));
+			$q->select('id,pagetitle');
+			if ($q->prepare() && $q->stmt->execute()) {
+				while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
+					$parents[$row['id']] = $row['pagetitle'];
+				}
+			}
+
+			$pids = array_reverse($pids);
+			$title = '';
+			foreach ($pids as $v) {
+				if ($v == 0) {}
+				else if (isset($parents[$v])) {
+					$title .= ' / '.$parents[$v];
+				}
+				else {
+					$title .= ' / '.$v;
+				}
+			}
+
+			$title = !empty($title) ? substr($title, 3) : '/';
+			$results[$title] = array(
+				'title' => $title
+				,'value' => $value
+				,'type' => 'parents'
+				,'resources' => $ids
+			);
+
+		}
+
+		ksort($results);
+		return $results;
+	}
+
+
+	/**
+	 * Returns string for insert into sorting properties of pdoTools snippet
+	 *
+	 * @param string
+	 *
+	 * @return string
+	 */
+	public function getSortFields($sort) {
+		$data = array();
+
+		$sort = explode(',', strtolower(trim($sort)));
+		foreach ($sort as $string) {
+			$table = 'resource';
+			$order = 'asc';
+
+			$tmp = explode($this->config['filter_delimeter'], $string);
+			if (!empty($tmp[1])) {
+				$table = $tmp[0];
+				$field = $tmp[1];
+			}
+			else {
+				$field = $tmp[0];
+			}
+
+			$tmp = explode($this->config['method_delimeter'], $field);
+			if (!empty($tmp[1])) {
+				$field = $tmp[0];
+				$order = $tmp[1];
+			}
+
+			if (isset($this->config['sortAliases'][$table])) {
+				if ($table == 'tv') {
+					$table = $this->config['sortAliases'][$table].$field;
+					$field = 'value';
+				}
+				else {
+					$table = $this->config['sortAliases'][$table];
+				}
+			}
+			else {
+				$table = $this->config['sortAliases']['resource'];
+			}
+
+			$data[] = "`$table`.`$field` $order";
+		}
+
+		return implode(',', $data);
+	}
+
+
+	/**
+	 * Default filtration method
+	 *
+	 * @param array $requested Filtered ids of resources
+	 * @param array $values Filter data with value and ids of matching resources
+	 * @param array $ids Ids of currently active resources
+	 *
+	 * @return array
+	 */
+	public function filterDefault(array $requested, array $values, array $ids) {
+		$matched = array();
+
+		foreach ($requested as $value) {
+			if (isset($values[$value])) {
+				$resources = $values[$value];
+				foreach ($resources as $id) {
+					if (in_array($id, $ids)) {
+						$matched[] = $id;
+					}
+				}
+			}
+		}
+
+		return $matched;
+	}
+
+
+	/**
+	 * Filters numbers. Values must be between min and max number
+	 *
+	 * @param array $requested Filtered ids of resources
+	 * @param array $values Filter data with min and max number
+	 * @param array $ids Ids of currently active resources
+	 *
+	 * @return array
+	 */
+	public function filterNumber(array $requested, array $values, array $ids) {
+		$matched = array();
+
+		sort($requested);
+		$min = array_shift($requested);
+		$max = array_pop($requested);
+
+		foreach ($values as $number => $resources) {
+			if ($number >= $min && $number <= $max) {
+				foreach ($resources as $id) {
+					if (in_array($id, $ids)) {
+						$matched[] = $id;
+					}
+				}
+			}
+		}
+
+		return $matched;
 	}
 
 }

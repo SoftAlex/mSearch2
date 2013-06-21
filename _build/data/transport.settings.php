@@ -3,7 +3,18 @@
 $settings = array();
 
 $tmp = array(
-	'index_fields' => array(
+	'frontend_css' => array(
+		'value' => '[[+cssUrl]]web/default.css'
+		,'xtype' => 'textfield'
+		,'area' => 'mse2_main'
+	)
+	,'frontend_js' => array(
+		'value' => '[[+jsUrl]]web/default.js'
+		,'xtype' => 'textfield'
+		,'area' => 'mse2_main'
+	)
+
+	,'index_fields' => array(
 		'xtype' => 'textarea'
 		,'value' => 'content:3,description:2,introtext:2,pagetitle:3,longtitle:3'
 		,'area' => 'mse2_index'
@@ -34,10 +45,15 @@ $tmp = array(
 		,'value' => 5
 		,'area' => 'mse2_search'
 	)
+	,'search_split_words' => array(
+		'xtype' => 'textfield'
+		,'value' => '#\s#'
+		,'area' => 'mse2_search'
+	)
 	,'filters_handler_class' => array(
 		'xtype' => 'textfield'
 		,'value' => 'mse2FiltersHandler'
-		,'area' => 'mse2_filters'
+		,'area' => 'mse2_main'
 	)
 );
 

@@ -1,0 +1,16 @@
+#mse2_sort a.active {
+	color: black;
+	text-decoration:none;
+	cursor: default;
+}
+
+#mse2_filters .disabled {
+	color: #AAA;
+}
+
+.mSearchLog, .mFilterLog {
+	width: 100%;
+	overflow: auto;
+	word-wrap: normal;
+	white-space: pre;
+}

@@ -35,5 +35,22 @@ $_lang['mse2_index_words'] = 'Проиндексировано слов';
 $_lang['mse2_index_limit'] = 'Индексировать по n страниц';
 $_lang['mse2_index_offset'] = 'Пропустить от начала';
 
+$_lang['mse2_filter_resource_isfolder'] = 'Контейнер';
+$_lang['mse2_filter_resource_class_key'] = 'Класс документа';
+$_lang['mse2_filter_ms_price'] = 'Цена';
+$_lang['mse2_filter_ms_vendor'] = 'Производитель';
+$_lang['mse2_filter_ms_new'] = 'Новый';
+$_lang['mse2_filter_resource_parent'] = 'Категория';
 $_lang['mse2_filter_boolean_yes'] = 'Да';
 $_lang['mse2_filter_boolean_no'] = 'Нет';
+$_lang['mse2_filter_number_min'] = 'Минимум';
+$_lang['mse2_filter_number_max'] = 'Максимум';
+$_lang['mse2_filter_total'] = 'Всего результатов:';
+
+$_lang['mse2_sort'] = 'Сортировка:';
+$_lang['mse2_sort_asc'] = 'по возрастанию';
+$_lang['mse2_sort_desc'] = 'по убыванию';
+$_lang['mse2_sort_publishedon'] = 'Дата публикации';
+$_lang['mse2_sort_price'] = 'Цена';
+
+$_lang['mse2_err_no_filters'] = 'Нечего фильтровать';

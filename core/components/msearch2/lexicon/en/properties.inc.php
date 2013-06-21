@@ -36,3 +36,14 @@ $_lang['mse2_prop_htagClose'] = 'Closing tag for the highlight of found results 
 $_lang['mse2_prop_minQuery'] = 'The minimum length of a search query.';
 $_lang['mse2_prop_parentsVar'] = 'The name of the variable to additional filter by parents. Default is "parents", can be send with $_REQUEST.';
 $_lang['mse2_prop_queryVar'] = 'The name of the variable of search query to get it from $_REQUEST. Default is "query"';
+
+$_lang['mse2_prop_paginator'] = 'Snippet for pagination, default is "getPage".';
+$_lang['mse2_prop_element'] = 'Snippet, which will be called пагинатором to output the results of work. Default is "mSearch2".';
+$_lang['mse2_prop_resources'] = 'List of resources for output, separated by commas. This list can be filtered by other parameters such as "parents", "showDeleted", "showHidden" and "showUnpublished".';
+$_lang['mse2_prop_showEmptyFilters'] = 'Show filters when it has the only one item.';
+$_lang['mse2_prop_sort'] = 'Comma separated list for sorting resources. It must be set in the form "table|field:direction". Default is "resource:publisedon:desc".';
+$_lang['mse2_prop_filters'] = 'Comma separated list of filters. It must be set in the form "table|field:method". Default is "resource|parent:parents".';
+
+$_lang['mse2_prop_tplOuter'] = 'Chunk for the whole block of filters and the results.';
+$_lang['mse2_prop_tplFilter.outer.default'] = 'Standard chunk of one filters group.';
+$_lang['mse2_prop_tplFilter.row.default'] = 'Standard chunk of a filter in the group. By default it look as checkbox.';

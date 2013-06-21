@@ -35,5 +35,22 @@ $_lang['mse2_index_words'] = 'Words in index';
 $_lang['mse2_index_limit'] = 'Page limit for index';
 $_lang['mse2_index_offset'] = 'Page offset';
 
+$_lang['mse2_filter_resource_isfolder'] = 'Container';
+$_lang['mse2_filter_resource_class_key'] = 'Class of document';
+$_lang['mse2_filter_ms_price'] = 'Price';
+$_lang['mse2_filter_ms_vendor'] = 'Vendor';
+$_lang['mse2_filter_ms_new'] = 'New';
+$_lang['mse2_filter_resource_parent'] = 'Category';
 $_lang['mse2_filter_boolean_yes'] = 'Yes';
 $_lang['mse2_filter_boolean_no'] = 'No';
+$_lang['mse2_filter_number_min'] = 'Minimum';
+$_lang['mse2_filter_number_max'] = 'Maximum';
+$_lang['mse2_filter_total'] = 'Total items:';
+
+$_lang['mse2_sort'] = 'Sort by:';
+$_lang['mse2_sort_asc'] = 'ascending';
+$_lang['mse2_sort_desc'] = 'descending';
+$_lang['mse2_sort_publishedon'] = 'Published on';
+$_lang['mse2_sort_price'] = 'Price';
+
+$_lang['mse2_err_no_filters'] = 'Nothing to filter';

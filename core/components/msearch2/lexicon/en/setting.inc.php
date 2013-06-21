@@ -23,6 +23,13 @@ $_lang['setting_mse2_search_exact_match_bonus'] = 'Bonus for an exact match';
 $_lang['setting_mse2_search_exact_match_bonus_desc'] = 'Specify the number of points added for an exact match the search phrase and the result. Default is "5".';
 $_lang['setting_mse2_search_all_words_bonus'] = 'Bonus for the match whole words';
 $_lang['setting_mse2_search_all_words_bonus_desc'] = 'If a search request consists of several words, and all of them were found in the resource - will assigned extra points. Default is "5".';
+$_lang['setting_mse2_search_split_words'] = 'Breakdown query on the words';
+$_lang['setting_mse2_search_split_words_desc'] = 'Regular expression for php function preg_split(), which breaks the user`s request to separate words for the search. By default words breaks by spaces.';
 
 $_lang['setting_mse2_filters_handler_class'] = 'Filters handler class';
 $_lang['setting_mse2_filters_handler_class_desc'] = 'The name of the class that implements the logic of a filters. Default is "mse2FiltersHandler".';
+
+$_lang['setting_mse2_frontend_css'] = 'Frontend styles';
+$_lang['setting_mse2_frontend_css_desc'] = 'Path to file with styles of the shop. If you want to use your own styles - specify them here, or clean this parameter and load them in site template.';
+$_lang['setting_mse2_frontend_js'] = 'Frontend scripts';
+$_lang['setting_mse2_frontend_js_desc'] = 'Path to file with scripts of the shop. If you want to use your own sscripts - specify them here, or clean this parameter and load them in site template.';

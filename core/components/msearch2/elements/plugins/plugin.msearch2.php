@@ -1,6 +1,6 @@
 <?php
 
-$id = $ids = 0;
+$id = 0;
 
 switch ($modx->event->name) {
 
@@ -23,6 +23,7 @@ switch ($modx->event->name) {
 	break;
 
 }
+
 
 if (!empty($id)) {
 	/* @var modProcessorResponse $response */

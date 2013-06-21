@@ -4,7 +4,23 @@ $chunks = array();
 
 $tmp = array(
 	'tpl.mSearch2.row' => array(
-		'file' => 'row'
+		'file' => 'msearch2.row'
+		,'description' => ''
+	)
+	,'tpl.mFilter2.outer' => array(
+		'file' => 'mfilter2.outer'
+		,'description' => ''
+	)
+	,'tpl.mFilter2.filter.outer' => array(
+		'file' => 'mfilter2.filter.outer'
+		,'description' => ''
+	)
+	,'tpl.mFilter2.filter.checkbox' => array(
+		'file' => 'mfilter2.filter.checkbox'
+		,'description' => ''
+	)
+	,'tpl.mFilter2.filter.number' => array(
+		'file' => 'mfilter2.filter.number'
 		,'description' => ''
 	)
 );

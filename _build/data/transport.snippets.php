@@ -7,6 +7,10 @@ $tmp = array(
 		'file' => 'msearch2'
 		,'description' => ''
 	)
+	,'mFilter2' => array(
+		'file' => 'mfilter2'
+		,'description' => ''
+	)
 );
 
 foreach ($tmp as $k => $v) {

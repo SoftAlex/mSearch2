@@ -17,29 +17,33 @@ if (empty($outputSeparator)) {$outputSeparator = "\n";}
 $returnIds = !empty($returnIds);
 $fastMode = !empty($fastMode);
 
+$found = array();
 $query = @$_REQUEST[$queryVar];
-if (empty($query) && isset($_REQUEST[$queryVar])) {
-	return $modx->lexicon('mse2_err_no_query');
-}
-else if (mb_strlen($query,'UTF-8') < $minQuery && !empty($query)) {
-	return $modx->lexicon('mse2_err_min_query');
-}
-else if (empty($query)) {
-	return;
-}
-else {
-	$modx->setPlaceholder('mse2_'.$queryVar, $query);
-}
+if (empty($resources)) {
+	if (empty($query) && isset($_REQUEST[$queryVar])) {
+		return $modx->lexicon('mse2_err_no_query');
+	}
+	else if (mb_strlen($query,'UTF-8') < $minQuery && !empty($query)) {
+		return $modx->lexicon('mse2_err_min_query');
+	}
+	else if (empty($query)) {
+		return;
+	}
+	else {
+		$query = htmlspecialchars(strip_tags(trim($query)));
+		$modx->setPlaceholder('mse2_'.$queryVar, $query);
+	}
 
-$found = $mSearch2->Search($query);
-$ids = array_keys($found);
-$resources = implode(',', $ids);
+	$found = $mSearch2->Search($query);
+	$ids = array_keys($found);
+	$resources = implode(',', $ids);
 
-if ($returnIds) {
-	return !empty($resources) ? $resources : '0';
-}
-else if (empty($found)) {
-	return $modx->lexicon('mse2_err_no_results');
+	if ($returnIds) {
+		return !empty($resources) ? $resources : '0';
+	}
+	else if (empty($found)) {
+		return $modx->lexicon('mse2_err_no_results');
+	}
 }
 
 /*----------------------------------------------------------------------------------*/
@@ -94,7 +98,6 @@ $leftJoin = array(
 $resourceColumns = !empty($includeContent) ?  $modx->getSelectColumns($class, $class) : $modx->getSelectColumns($class, $class, '', array('content'), true);
 $select = array('"'.$class.'":"'.$resourceColumns.'"');
 $select[] = '"Intro":"intro" ';
-if (!empty($tvsSelect)) {$select = array_merge($select, $tvsSelect);}
 
 // Default parameters
 $default = array(
@@ -123,7 +126,7 @@ $output = null; $offset++;
 if (!empty($rows) && is_array($rows)) {
 	foreach ($rows as $k => $row) {
 		// Processing main fields
-		$row['weight'] = $found[$row['id']];
+		$row['weight'] = @$found[$row['id']];
 		$row['intro'] = $mSearch2->Highlight($row['intro'], $query, $htagOpen, $htagClose);
 		$row['idx'] = $offset++;
 

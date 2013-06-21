@@ -10,7 +10,7 @@ switch ($options[xPDOTransport::PACKAGE_ACTION]) {
 		$packages = array(
 			'pdoTools' => array(
 				'version_major' => 1
-				,'version_minor' => 2
+				,'version_minor' => 3
 			)
 		);
 
