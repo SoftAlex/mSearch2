@@ -95,6 +95,37 @@ class mse2FiltersHandler {
 
 
 	/**
+	 * Retrieves values from miniShop2 Product table
+	 *
+	 * @param array $keys Keys of ms2 products options
+	 * @param array $ids Ids of needed resources
+	 *
+	 * @return array Array with ms2 fields as keys and resources ids as values
+	 */
+	public function getMsOptionValues(array $keys, array $ids) {
+		$filters = array();
+		$q = $this->modx->newQuery('msProductOption');
+		$q->where(array('product_id:IN' => $ids, 'key:IN' => $keys));
+		$q->select('`product_id`,`key`,`value`');
+		if ($q->prepare() && $q->stmt->execute()) {
+			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
+				if (isset($filters[$row['key']][$row['value']])) {
+					$filters[$row['key']][$row['value']][] = $row['product_id'];
+				}
+				else {
+					$filters[$row['key']][$row['value']] = array($row['product_id']);
+				}
+			}
+		}
+		else {
+			$this->modx->log(modX::LOG_LEVEL_ERROR, "[mSearch2] Error on get filter params.\nQuery: ".$q->toSql()."\nResponse: ".print_r($q->stmt->errorInfo(),1));
+		}
+
+		return $filters;
+	}
+
+
+	/**
 	 * Retrieves values from Resource table
 	 *
 	 * @param array $fields Names of resource fields

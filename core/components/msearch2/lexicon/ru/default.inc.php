@@ -46,6 +46,8 @@ $_lang['mse2_filter_boolean_no'] = 'Нет';
 $_lang['mse2_filter_number_min'] = 'Минимум';
 $_lang['mse2_filter_number_max'] = 'Максимум';
 $_lang['mse2_filter_total'] = 'Всего результатов:';
+$_lang['mse2_filter_msoption_color'] = 'Цвета';
+$_lang['mse2_filter_msoption_size'] = 'Размеры';
 
 $_lang['mse2_sort'] = 'Сортировка:';
 $_lang['mse2_sort_asc'] = 'по возрастанию';

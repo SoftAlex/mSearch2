@@ -46,6 +46,8 @@ $_lang['mse2_filter_boolean_no'] = 'No';
 $_lang['mse2_filter_number_min'] = 'Minimum';
 $_lang['mse2_filter_number_max'] = 'Maximum';
 $_lang['mse2_filter_total'] = 'Total items:';
+$_lang['mse2_filter_msoption_color'] = 'Colors';
+$_lang['mse2_filter_msoption_size'] = 'Sizes';
 
 $_lang['mse2_sort'] = 'Sort by:';
 $_lang['mse2_sort_asc'] = 'ascending';
