@@ -182,8 +182,9 @@ class mSearch2 {
 	 *
 	 * @return array
 	 */
-	public function getBulkWords($text = '') {
-		$words = preg_split($this->config['split_words'], $text, -1, PREG_SPLIT_NO_EMPTY);
+	public function getBulkWords($text = '', $pcre = '') {
+		if (empty($pcre)) {$pcre = $this->config['split_words'];}
+		$words = preg_split($pcre, $text, -1, PREG_SPLIT_NO_EMPTY);
 		$bulk_words = array();
 		foreach ($words as $v) {
 			if (mb_strlen($v,'UTF-8') >= $this->config['min_word_length']) {
@@ -203,7 +204,6 @@ class mSearch2 {
 	 * @return array|string
 	 */
 	function getBaseForms($text, $only_words = 1) {
-
 		$result = array();
 		if (is_array($text)) {
 			foreach ($text as $v) {
@@ -214,7 +214,7 @@ class mSearch2 {
 			$text = str_ireplace('ё', 'е', $this->modx->stripTags($text));
 			$text = preg_replace('#\[.*\]#isU', '', $text);
 
-			$bulk_words = $this->getBulkWords($text);
+			$bulk_words = $this->getBulkWords($text, '#\s|[,.:;!?"\'(){}\\/\#]#');
 			$this->loadPhpMorphy();
 			/* @var phpMorphy $phpMorphy */
 			$base_forms = array();
@@ -227,7 +227,8 @@ class mSearch2 {
 			foreach ($base_forms as $lang) {
 				if (!empty($lang)) {
 					foreach ($lang as $word => $forms) {
-						if (!$forms) {$forms = array($word);}
+						//if (!$forms) {$forms = array($word);}
+						if (!$forms) {continue;}
 						foreach ($forms as $form) {
 							if (mb_strlen($form,'UTF-8') >= $this->config['min_word_length']) {
 								$result[$form] = $word;
@@ -342,11 +343,9 @@ class mSearch2 {
 			}
 		}
 
-		//$not_found = array_diff($bulk_words, array_keys($found_words));
-		//foreach ($not_found as $word) {
+		// Add matches by %LIKE% search
 		foreach ($bulk_words as $word) {
 			$found = $this->simpleSearch($word);
-
 			foreach ($found as $v) {
 				if (!isset($result[$v])) {
 					$result[$v] = floor($this->config['exact_match_bonus'] / 2);

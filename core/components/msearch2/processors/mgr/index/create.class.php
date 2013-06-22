@@ -172,18 +172,18 @@ class mseIndexCreateProcessor extends modProcessor {
 		$sql = "INSERT INTO {$tintro} (`resource`, `intro`) VALUES ('$resource_id', '$intro') ON DUPLICATE KEY UPDATE `intro` = '$intro';";
 		$sql .= "DELETE FROM {$tword} WHERE `resource` = '$resource_id';";
 		$sql .= "INSERT INTO {$tword} (`resource`, `word`, `weight`) VALUES ";
-		if (!empty($words)) {
 
+		if (!empty($words)) {
 			$rows = array();
 			foreach ($words as $word => $weight) {
-				$rows[] = "('$resource_id', '$word', '$weight')";
+				$rows[] = '('.$resource_id.', "'.$word.'", '.$weight.')';
 			}
 			if (!empty($rows)) {
 				$sql .= implode(',', $rows);
 			}
 		}
 		$sql .= " ON DUPLICATE KEY UPDATE `resource` = '$resource_id';";
-		/* @var PDOStatement $q */
+
 		$q = $this->modx->prepare($sql);
 		if (!$q->execute()) {
 			$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Could not save search index of resource '.$resource_id.': '.print_r($q->errorInfo(),1));

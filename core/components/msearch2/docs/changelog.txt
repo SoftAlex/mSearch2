@@ -1,10 +1,11 @@
 Changelog for mSearch2.
 
-0.5.1 beta1
+0.5.1 beta2
 ==============
 - Added msFiltersHandler::getMsOptionValues() method. You can use &filters=`msoption|size,msoption|color` now.
 - Added update of main filter log on ajax requests, if enabled.
-- Added parameter "disableSuggestions" for very fast filtration. if enabled, you will see small numbers next to the filter parameters.
+- Added parameter "disableSuggestions" for very fast filtration. if enabled, you will not see small numbers next to the filter parameters.
+- Improved indexing. It is recommended to update the search index manually.
 
 0.5.0 beta2
 ==============
