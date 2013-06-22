@@ -47,8 +47,13 @@ switch ($action) {
 		$pdoFetch->addTime('Getting filters for saved ids: ('.$paginatorProperties['resources'].')');
 		$ids = $mSearch2->Filter($paginatorProperties['resources'], $_REQUEST);
 		$pdoFetch->addTime('Filters retrieved.');
-		$suggestions = $mSearch2->getSuggestions($paginatorProperties['resources'], $_REQUEST, $ids);
-		$pdoFetch->addTime('Suggestions retrieved.');
+		if (empty($config['disableSuggestions'])) {
+			$suggestions = $mSearch2->getSuggestions($paginatorProperties['resources'], $_REQUEST, $ids);
+			$pdoFetch->addTime('Suggestions retrieved.');
+		} else {
+			$suggestions = array();
+			$pdoFetch->addTime('Suggestions disabled by snippet parameter.');
+		}
 
 		// Saving log
 		$log = $pdoFetch->timings;
@@ -81,7 +86,7 @@ switch ($action) {
 			'success' => true
 			,'message' => ''
 			,'data' => array(
-				'results' => $results
+				'results' => !empty($results) ? $results : $modx->lexicon('mse2_err_no_results')
 				,'pagination' => $pagination
 				,'total' => empty($total) ? 0 : $total
 				,'suggestions' => $suggestions

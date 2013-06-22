@@ -4,7 +4,7 @@
 			[[+filters]]
 		</form>
 
-		<div>[[%mse2_filter_total]] <b><span id="mse2_total">[[+total:default=`0`]]</span></b></div>
+		<div>[[%mse2_filter_total]] <span id="mse2_total">[[+total:default=`0`]]</span></div>
 	</div>
 
 	<div class="span9">
@@ -23,6 +23,5 @@
 			</ul>
 		</div>
 
-		<div>[[%mse2_filter_total]] <span id="mse2_total">[[+total:default=`0`]]</span></div>
 	</div>
 </div>

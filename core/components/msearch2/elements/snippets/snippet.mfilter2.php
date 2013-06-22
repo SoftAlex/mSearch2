@@ -127,7 +127,9 @@ if (!empty($ids)) {
 
 		if (!empty($_GET)) {
 			$matched = $mSearch2->Filter($ids, $_REQUEST);
-			$suggestions = $mSearch2->getSuggestions($ids, $_REQUEST, $matched);
+			if (empty($scriptProperties['disableSuggestions'])) {
+				$suggestions = $mSearch2->getSuggestions($ids, $_REQUEST, $matched);
+			}
 			$paginatorProperties['resources'] = is_array($ids) ? implode(',', $matched) : $matched;
 		}
 		$paginator->setProperties($paginatorProperties);
@@ -180,13 +182,15 @@ else {
 		foreach ($data as $v) {
 			if (empty($v)) {continue;}
 			$checked = isset($request[$filter]) && in_array($v['value'], $request[$filter]);
-			if ($checked) {$num = '';}
-			else if (!empty($suggestions[$filter][$v['value']])) {
-				$num = $suggestions[$filter][$v['value']];
-			}
-			else {
-				$num = !empty($v['resources']) ? count($v['resources']) : '';
-			}
+			if (empty($scriptProperties['disableSuggestions'])) {
+				if ($checked) {$num = '';}
+				else if (!empty($suggestions[$filter][$v['value']])) {
+					$num = $suggestions[$filter][$v['value']];
+				}
+				else {
+					$num = !empty($v['resources']) ? count($v['resources']) : '';
+				}
+			} else {$num = '';}
 
 			$rows .= $pdoFetch->getChunk($tplRow, array(
 				'filter' => $filter2

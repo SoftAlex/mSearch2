@@ -43,6 +43,7 @@ $_lang['mse2_prop_resources'] = 'List of resources for output, separated by comm
 $_lang['mse2_prop_showEmptyFilters'] = 'Show filters when it has the only one item.';
 $_lang['mse2_prop_sort'] = 'Comma separated list for sorting resources. It must be set in the form "table|field:direction". Default is "resource:publisedon:desc".';
 $_lang['mse2_prop_filters'] = 'Comma separated list of filters. It must be set in the form "table|field:method". Default is "resource|parent:parents".';
+$_lang['mse2_prop_disableSuggestions'] = 'This option disables the estimated number of results, which is displayed next to each filter. Activate if you are unhappy with filtration rate.';
 
 $_lang['mse2_prop_tplOuter'] = 'Chunk for the whole block of filters and the results.';
 $_lang['mse2_prop_tplFilter.outer.default'] = 'Standard chunk of one filters group.';

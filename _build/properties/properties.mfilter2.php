@@ -78,6 +78,10 @@ $tmp = array(
 		'type' => 'combo-boolean'
 		,'value' => false
 	)
+	,'disableSuggestions' => array(
+		'type' => 'combo-boolean'
+		,'value' => false
+	)
 );
 
 foreach ($tmp as $k => $v) {
