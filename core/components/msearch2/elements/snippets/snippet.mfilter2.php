@@ -227,7 +227,7 @@ $output[$sort] = $classActive;
 
 // Setting values for frontend javascript
 $modx->regClientStartupScript('<script type="text/javascript">
-	mSearch2Config.start_sort = "'.$scriptProperties['sort'].'";
+	mSearch2Config.start_sort = "'.implode(',', array_map('trim' , explode(',', $scriptProperties['sort']))).'";
 	mSearch2Config.start_page = 1;
 	mSearch2Config.sort = "'.$sort.'";
 	mSearch2Config.page = "'.$page.'";
