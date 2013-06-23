@@ -159,15 +159,17 @@ mSearch2 = {
 	}
 
 	,setTotal: function(total) {
-		if (!total || total == 0) {
-			this.total.parent().hide();
-			this.sort.hide();
-			this.total.text(0);
-		}
-		else {
-			this.total.parent().show();
-			this.sort.show();
-			this.total.text(total);
+		if (this.total.length != 0) {
+			if (!total || total == 0) {
+				this.total.parent().hide();
+				this.sort.hide();
+				this.total.text(0);
+			}
+			else {
+				this.total.parent().show();
+				this.sort.show();
+				this.total.text(total);
+			}
 		}
 	}
 
@@ -240,7 +242,7 @@ mSearch2.Hash = {
 		this.set(hash);
 	}
 	,clear: function() {
-		window.location.hash = '';
+		this.set({});
 	}
 };
 
