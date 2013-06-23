@@ -223,7 +223,11 @@ mSearch2.Hash = {
 				hash += '&' + i + '=' + vars[i];
 			}
 		}
-		window.history.pushState(hash, '', document.location.pathname + '?' + hash.substr(1));
+
+		if (hash.length != 0) {
+			hash = '?' + hash.substr(1);
+		}
+		window.history.pushState(hash, '', document.location.pathname + hash);
 	}
 	,add: function(key, val) {
 		var hash = this.get();
