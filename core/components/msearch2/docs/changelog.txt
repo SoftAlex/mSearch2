@@ -1,5 +1,9 @@
 Changelog for mSearch2.
 
+0.5.3 pl
+==============
+- Added excluding not searchable resources from index.
+
 0.5.1 beta2
 ==============
 - Added msFiltersHandler::getMsOptionValues() method. You can use &filters=`msoption|size,msoption|color` now.

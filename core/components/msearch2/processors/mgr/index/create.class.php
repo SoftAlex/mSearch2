@@ -61,7 +61,7 @@ class mseIndexCreateProcessor extends modProcessor {
 		$i = 0;
 		/* @var modResource|Ticket|msProduct $resource */
 		foreach ($collection as $data) {
-			if ($data['deleted']) {
+			if ($data['deleted'] || !$data['searchable']) {
 				$this->unIndex($data['id']);
 				continue;
 			}
@@ -105,7 +105,7 @@ class mseIndexCreateProcessor extends modProcessor {
 			array_keys($this->modx->getFieldMeta('modResource'))
 			,array_keys($this->fields)
 		);
-		$select_fields = array_unique(array_merge($select_fields, array('id','class_key','deleted')));
+		$select_fields = array_unique(array_merge($select_fields, array('id','class_key','deleted','searchable')));
 
 		$c = $this->modx->newQuery('modResource');
 		$c->limit($limit, $offset);
@@ -133,7 +133,7 @@ class mseIndexCreateProcessor extends modProcessor {
 	 * @return xPDOQuery
 	 */
 	public function prepareQuery(xPDOQuery $c) {
-		$c->where(array('searchable' => 1));
+		//$c->where(array('searchable' => 1));
 
 		return $c;
 	}
