@@ -56,6 +56,7 @@ class mSearch2 {
 			,'filter_delimeter' => '|'
 			,'method_delimeter' => ':'
 			,'split_words' => $this->modx->getOption('mse2_search_split_words', null, '#\s#', true)
+			,'split_all' => '#\s|[,.:;!?"\'(){}\\/\#]#'
 		), $config);
 
 		if (!is_array($this->config['languages'])) {
@@ -214,7 +215,7 @@ class mSearch2 {
 			$text = str_ireplace('ё', 'е', $this->modx->stripTags($text));
 			$text = preg_replace('#\[.*\]#isU', '', $text);
 
-			$bulk_words = $this->getBulkWords($text, '#\s|[,.:;!?"\'(){}\\/\#]#');
+			$bulk_words = $this->getBulkWords($text, $this->config['split_all']);
 			$this->loadPhpMorphy();
 			/* @var phpMorphy $phpMorphy */
 			$base_forms = array();
@@ -300,29 +301,30 @@ class mSearch2 {
 	public function Search($query) {
 		$string = preg_replace('/[^_-а-яёa-z0-9\s\.\/]+/iu', ' ', $this->modx->stripTags($query));
 		$words = $this->getBaseForms($string, 0);
-		$bulk_words = array_unique(array_values($words));
 
 		$result = $all_words = $found_words = array();
-		$q = $this->modx->newQuery('mseWord');
-		$q->select('`resource`, `word`, `weight`');
-		$q->where(array('word:IN' => array_keys($words)));
-		if ($q->prepare() && $q->stmt->execute()) {
-			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
-				if (isset($result[$row['resource']])) {
-					$result[$row['resource']] += $row['weight'];
-				}
-				else {
-					$result[$row['resource']] = (int) $row['weight'];
-				}
+		if (!empty($words)) {
+			$q = $this->modx->newQuery('mseWord');
+			$q->select('`resource`, `word`, `weight`');
+			$q->where(array('word:IN' => array_keys($words)));
+			if ($q->prepare() && $q->stmt->execute()) {
+				while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
+					if (isset($result[$row['resource']])) {
+						$result[$row['resource']] += $row['weight'];
+					}
+					else {
+						$result[$row['resource']] = (int) $row['weight'];
+					}
 
-				if (isset($words[$row['word']])) {
-					@$all_words[$row['resource']][$words[$row['word']]] = 1;
-					@$found_words[$words[$row['word']]] = 1;
+					if (isset($words[$row['word']])) {
+						@$all_words[$row['resource']][$words[$row['word']]] = 1;
+						@$found_words[$words[$row['word']]] = 1;
+					}
 				}
-
 			}
 		}
 
+		$bulk_words = $this->getBulkWords($query, $this->config['split_all']);
 		if (count($bulk_words) > 1) {
 			$exact = $this->simpleSearch($query);
 			// Exact match bonus
@@ -368,6 +370,7 @@ class mSearch2 {
 	public function simpleSearch($query) {
 		$string = preg_replace('/[^_-а-яёa-z0-9\s\.\/]+/iu', ' ', $this->modx->stripTags($query));
 
+		$result = array();
 		$q = $this->modx->newQuery('mseIntro');
 		$q->select('`resource`');
 		$q->where(array('intro:LIKE' => '%'.$string.'%'));
