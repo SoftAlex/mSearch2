@@ -84,9 +84,9 @@ $pdoFetch->timings = array();
 
 
 // ---------------------- Loading results
-$sort = '';
+$start_sort = implode(',', array_map('trim' , explode(',', $scriptProperties['sort'])));
 $suggestions = array();
-$page = '';
+$page = $sort = '';
 if (!empty($ids)) {
 	/* @var modSnippet $paginator */
 	if ($paginator = $modx->getObject('modSnippet', array('name' => $scriptProperties['paginator']))) {
@@ -97,15 +97,15 @@ if (!empty($ids)) {
 				'resources' => implode(',',$ids)
 				,'parents' => '0'
 				,'element' => $scriptProperties['element']
+				,'defaultSort' => $start_sort
 			)
 		);
 
 		if (!empty($_REQUEST['sort'])) {
 			$sort = $_REQUEST['sort'];
 		}
-		else if (!empty($scriptProperties['sort'])) {
-			$tmp = array_map('trim', explode(',',$scriptProperties['sort']));
-			$sort = implode(',', $tmp);
+		else if (!empty($start_sort)) {
+			$sort = $start_sort;
 		}
 		else {
 			$sortby = !empty($scriptProperties['sortby']) ? $scriptProperties['sortby'] : '';
@@ -227,9 +227,9 @@ $output[$sort] = $classActive;
 
 // Setting values for frontend javascript
 $modx->regClientStartupScript('<script type="text/javascript">
-	mSearch2Config.start_sort = "'.implode(',', array_map('trim' , explode(',', $scriptProperties['sort']))).'";
+	mSearch2Config.start_sort = "'.$start_sort.'";
 	mSearch2Config.start_page = 1;
-	mSearch2Config.sort = "'.$sort.'";
+	mSearch2Config.sort = "'.($sort == $start_sort ? '' : $sort).'";
 	mSearch2Config.page = "'.$page.'";
 	mSearch2Config.delimeter = "'.$mSearch2->config['filter_delimeter'].'";
 	mSearch2Config.query = "'.@$_REQUEST[$queryVar].'";

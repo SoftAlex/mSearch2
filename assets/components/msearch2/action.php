@@ -39,11 +39,19 @@ switch ($action) {
 		unset($_REQUEST['pageId'], $_REQUEST['action']);
 		$_GET = $_REQUEST;
 
+		// Get sorting parameters
 		if (!empty($_REQUEST['sort'])) {
-			$paginatorProperties['sortby'] = $mSearch2->getSortFields($_REQUEST['sort']);
+			$sort = $_REQUEST['sort'];
+		}
+		else if (!empty($paginatorProperties['defaultSort'])) {
+			$sort = $paginatorProperties['defaultSort'];
+		}
+		if (!empty($sort)) {
+			$paginatorProperties['sortby'] = $mSearch2->getSortFields($sort);
 			$paginatorProperties['sortdir'] = '';
 		}
 
+		// Processing filters
 		$pdoFetch->addTime('Getting filters for saved ids: ('.$paginatorProperties['resources'].')');
 		$ids = $mSearch2->Filter($paginatorProperties['resources'], $_REQUEST);
 		$pdoFetch->addTime('Filters retrieved.');
@@ -59,6 +67,7 @@ switch ($action) {
 		$log = $pdoFetch->timings;
 		$pdoFetch->timings = array();
 
+		// Retrieving results
 		if (!empty($ids)) {
 			$paginatorProperties['resources'] = is_array($ids) ? implode(',', $ids) : $ids;
 			$results = $modx->runSnippet($mSearch2->config['paginator'], $paginatorProperties);
