@@ -1,6 +1,6 @@
 Changelog for mSearch2.
 
-0.5.1 pl
+0.5.1 pl1
 ==============
 - Added excluding not searchable resources from index.
 - Small improvements of default javascript.
