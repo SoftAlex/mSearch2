@@ -49,7 +49,7 @@ if (empty($resources)) {
 /*----------------------------------------------------------------------------------*/
 
 // Start building "Where" expression
-$where = array("id IN ({$resources})");
+$where = array($class.".id IN ({$resources})");
 if (empty($showUnpublished)) {$where['published'] = 1;}
 if (empty($showHidden)) {$where['hidemenu'] = 0;}
 if (empty($showDeleted)) {$where['deleted'] = 0;}
@@ -105,7 +105,7 @@ $default = array(
 	,'where' => $modx->toJSON($where)
 	,'leftJoin' => '['.implode(',',$leftJoin).']'
 	,'select' => '{'.implode(',',$select).'}'
-	,'sortby' => !empty($sortby) ? $sortby : "find_in_set(`id`,'{$resources}')"
+	,'sortby' => !empty($sortby) ? $sortby : "find_in_set(`$class`.`id`,'{$resources}')"
 	,'sortdir' => !empty($sortdir) ? $sortdir : ''
 	//,'groupby' => $class.'.id'
 	,'fastMode' => $fastMode
