@@ -1,5 +1,10 @@
 Changelog for mSearch2.
 
+0.5.1 pl2
+==============
+- Fixed work with "&includeTVs" when snippet mFilter2 calls snippet mSearch2.
+- Added verification for non existing filter methods.
+
 0.5.1 pl1
 ==============
 - Added excluding not searchable resources from index.

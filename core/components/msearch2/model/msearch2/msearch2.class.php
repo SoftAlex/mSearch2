@@ -591,15 +591,17 @@ class mSearch2 {
 			$method = !empty($methods[$filter]) ? 'filter' . ucfirst($methods[$filter]) : 'filterDefault';
 
 			list($table, $filter) = explode($this->config['filter_delimeter'], $filter);
-			$values = $filters[$table][$filter];
-			$requested = explode(',', $requested);
+			if (isset($filters[$table][$filter])) {
+				$values = $filters[$table][$filter];
+				$requested = explode(',', $requested);
 
-			if (method_exists($this->filtersHandler, $method)) {
-				$ids = call_user_func_array(array($this->filtersHandler, $method), array($requested, $values, $ids));
-			}
-			else {
-				//$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Method "'.$method.'" not exists in class "'.get_class($this->filtersHandler).'". Could not build filter "'.$table.$this->config['filter_delimeter'].$filter.'"');
-				$ids = call_user_func_array(array($this->filtersHandler, 'filterDefault'), array($requested, $values, $ids));
+				if (method_exists($this->filtersHandler, $method)) {
+					$ids = call_user_func_array(array($this->filtersHandler, $method), array($requested, $values, $ids));
+				}
+				else {
+					$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Method "'.$method.'" not exists in class "'.get_class($this->filtersHandler).'". Could not build filter "'.$table.$this->config['filter_delimeter'].$filter.'"');
+					//$ids = call_user_func_array(array($this->filtersHandler, 'filterDefault'), array($requested, $values, $ids));
+				}
 			}
 		}
 
