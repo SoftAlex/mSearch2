@@ -135,8 +135,8 @@ mSearch2 = {
 						var count = arr[value];
 						var selector = filter.replace(mSearch2Config.delimeter, "\\" + mSearch2Config.delimeter);
 						var input = $('#' + mSearch2.options.prefix + selector, mSearch2.filters).find('[value="' + value + '"]');
-
-						if (input.prop('type') != 'checkbox') {continue;}
+						var proptype = input.prop('type');
+						if (proptype != 'checkbox' && proptype != 'radio') {continue;}
 
 						var label = $('#' + mSearch2.options.prefix + selector, mSearch2.filters).find('label[for="' + input.prop('id') + '"]');
 						var elem = input.parent().find(mSearch2.options.suggestion);
