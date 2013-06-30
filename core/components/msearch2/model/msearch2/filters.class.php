@@ -7,7 +7,7 @@ class mse2FiltersHandler {
 	public $modx;
 
 
-	function __construct(mSearch2 &$mse2,array $config = array()) {
+	public function __construct(mSearch2 &$mse2,array $config = array()) {
 		$this->modx =& $mse2->modx;
 		$this->mse2 =& $mse2;
 
@@ -43,6 +43,8 @@ class mse2FiltersHandler {
 		$q->select('`name`,`contentid`,`value`');
 		if ($q->prepare() && $q->stmt->execute()) {
 			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
+				$row['value'] = trim($row['value']);
+				if ($row['value'] == '') {continue;}
 				if (isset($filters[$row['name']][$row['value']])) {
 					$filters[$row['name']][$row['value']][] = $row['contentid'];
 				}
@@ -75,6 +77,7 @@ class mse2FiltersHandler {
 		if ($q->prepare() && $q->stmt->execute()) {
 			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
 				foreach ($row as $k => $v) {
+					$v = trim($v);
 					if ($v == '' || $k == 'id') {continue;}
 					else if (isset($filters[$k][$v])) {
 						$filters[$k][$v][] = $row['id'];
@@ -109,6 +112,8 @@ class mse2FiltersHandler {
 		$q->select('`product_id`,`key`,`value`');
 		if ($q->prepare() && $q->stmt->execute()) {
 			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
+				$row['value'] = trim($row['value']);
+				if ($row['value'] == '') {continue;}
 				if (isset($filters[$row['key']][$row['value']])) {
 					$filters[$row['key']][$row['value']][] = $row['product_id'];
 				}
@@ -141,6 +146,7 @@ class mse2FiltersHandler {
 		if ($q->prepare() && $q->stmt->execute()) {
 			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
 				foreach ($row as $k => $v) {
+					$v = trim($v);
 					if ($v == '' || $k == 'id') {continue;}
 					else if (isset($filters[$k][$v])) {
 						$filters[$k][$v][] = $row['id'];
@@ -204,8 +210,8 @@ class mse2FiltersHandler {
 
 		sort($tmp);
 		if (count($values) >= 2) {
-			$min = array_shift($tmp);
-			$max = array_pop($tmp);
+			$min = floor(array_shift($tmp));
+			$max = ceil(array_pop($tmp));
 		}
 		else {
 			$min = $max = $tmp[0];
@@ -415,11 +421,12 @@ class mse2FiltersHandler {
 	public function filterDefault(array $requested, array $values, array $ids) {
 		$matched = array();
 
+		$tmp = array_flip($ids);
 		foreach ($requested as $value) {
 			if (isset($values[$value])) {
 				$resources = $values[$value];
 				foreach ($resources as $id) {
-					if (in_array($id, $ids)) {
+					if (isset($tmp[$id])) {
 						$matched[] = $id;
 					}
 				}
@@ -443,8 +450,8 @@ class mse2FiltersHandler {
 		$matched = array();
 
 		sort($requested);
-		$min = array_shift($requested);
-		$max = array_pop($requested);
+		$min = floor(array_shift($requested));
+		$max = ceil(array_pop($requested));
 
 		foreach ($values as $number => $resources) {
 			if ($number >= $min && $number <= $max) {

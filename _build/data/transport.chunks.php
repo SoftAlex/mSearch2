@@ -23,6 +23,10 @@ $tmp = array(
 		'file' => 'mfilter2.filter.number'
 		,'description' => ''
 	)
+	,'tpl.mFilter2.filter.radio' => array(
+		'file' => 'mfilter2.filter.radio'
+		,'description' => ''
+	)
 );
 
 foreach ($tmp as $k => $v) {

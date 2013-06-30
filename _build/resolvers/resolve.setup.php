@@ -36,7 +36,7 @@ switch ($options[xPDOTransport::PACKAGE_ACTION]) {
 				@mkdir($path.'phpmorphy/dicts/');
 			//}
 
-			require MODX_CORE_PATH . 'xpdo/compression/pclzip.lib.php';
+			if (!class_exists('PclZipUtilPathReduction')) {require MODX_CORE_PATH . 'xpdo/compression/pclzip.lib.php';}
 			$dicts = $path.'phpmorphy/dicts/';
 			$src_ru = 'http://downloads.sourceforge.net/project/phpmorphy/phpmorphy-dictionaries/0.3.x/ru_RU/morphy-0.3.x-ru_RU-nojo-utf8.zip';
 			$dst_ru = $dicts . 'dict_ru.zip';

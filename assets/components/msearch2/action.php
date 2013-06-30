@@ -8,8 +8,6 @@ if (!isset($modx)) {
 	$modx->setLogLevel(modX::LOG_LEVEL_ERROR);
 	$modx->setLogTarget('FILE');
 	$modx->error->message = null;
-	$ctx = !empty($_REQUEST['ctx']) ? $_REQUEST['ctx'] : 'web';
-	if ($ctx != 'web') {$modx->switchContext($ctx);}
 }
 
 if (empty($_REQUEST['action'])) {
@@ -22,6 +20,9 @@ else {
 if (!empty($_REQUEST['pageId']) && !$modx->resource) {
 	$modx->resource = $modx->getObject('modResource', $_REQUEST['pageId']);
 	$config = $_SESSION['mFilter2'][@$_REQUEST['pageId']]['scriptProperties'];
+	if ($modx->resource->get('context_key' != 'web')) {
+		$modx->switchContext($modx->resource->context_key);
+	}
 }
 else {$config = array();}
 
@@ -35,9 +36,7 @@ $pdoFetch->addTime('pdoTools loaded.');
 switch ($action) {
 	case 'filter':
 		$paginatorProperties = $_SESSION['mFilter2'][@$_REQUEST['pageId']]['paginatorProperties'];
-
 		unset($_REQUEST['pageId'], $_REQUEST['action']);
-		$_GET = $_REQUEST;
 
 		// Get sorting parameters
 		if (!empty($_REQUEST['sort'])) {
@@ -52,11 +51,23 @@ switch ($action) {
 		}
 
 		// Processing filters
-		$pdoFetch->addTime('Getting filters for saved ids: ('.$paginatorProperties['resources'].')');
-		$ids = $mSearch2->Filter($paginatorProperties['resources'], $_REQUEST);
+		if (strpos($paginatorProperties['resources'], '{') === 0) {
+			$found = $modx->fromJSON($paginatorProperties['resources']);
+			$ids = array_keys($found);
+		}
+		else {
+			$ids = explode(',', $paginatorProperties['resources']);
+		}
+
+		$resources = implode(',', $ids);
+		$pdoFetch->addTime('Getting filters for saved ids: ('.$resources.')');
+
+		$matched = $mSearch2->Filter($ids, $_REQUEST);
+		$ids = array_intersect($ids, $matched);
+
 		$pdoFetch->addTime('Filters retrieved.');
-		if (empty($config['disableSuggestions'])) {
-			$suggestions = $mSearch2->getSuggestions($paginatorProperties['resources'], $_REQUEST, $ids);
+		if (!empty($config['suggestions'])) {
+			$suggestions = $mSearch2->getSuggestions($resources, $_REQUEST, $ids);
 			$pdoFetch->addTime('Suggestions retrieved.');
 		} else {
 			$suggestions = array();
@@ -69,7 +80,17 @@ switch ($action) {
 
 		// Retrieving results
 		if (!empty($ids)) {
+			$_GET = $_REQUEST;
 			$paginatorProperties['resources'] = is_array($ids) ? implode(',', $ids) : $ids;
+			// Trying to save weight of found ids if using mSearch2
+			if (!empty($found) && strtolower($paginatorProperties['element']) == 'msearch2') {
+				$tmp = array();
+				foreach ($ids as $v) {
+					$tmp[$v] = @$found[$v];
+				}
+				$paginatorProperties['resources'] = $modx->toJSON($tmp);
+			}
+
 			$results = $modx->runSnippet($mSearch2->config['paginator'], $paginatorProperties);
 			$pagination = $modx->getPlaceholder($paginatorProperties['pageNavVar']);
 			$total = $modx->getPlaceholder($paginatorProperties['totalVar']);
@@ -91,6 +112,7 @@ switch ($action) {
 		}
 
 		$pdoFetch->timings = $log;
+		$pdoFetch->addTime('Total filter operations: '.$mSearch2->filter_operations);
 		$response = array(
 			'success' => true
 			,'message' => ''
@@ -103,8 +125,7 @@ switch ($action) {
 			)
 		);
 		$response = $modx->toJSON($response);
-
-		break;
+	break;
 
 	default:
 		$response = $modx->toJSON(array('success' => false, 'message' => 'Access denied'));

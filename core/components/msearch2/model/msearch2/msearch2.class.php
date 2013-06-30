@@ -11,17 +11,23 @@ class mSearch2 {
 	/* @var mSearch2ControllerRequest $request */
 	protected $request;
 	/* @var mse2FiltersHandler $filtersHandler */
-	public $filtersHandler = array();
+	public $filtersHandler = null;
 	public $phpMorphy = array();
 	public $initialized = array();
+	/* Cache for filters methods */
+	public $methods = array();
+	/* Cache for filters values */
+	public $filters = array();
+	/* Total number of filter operations */
+	public $filter_operations = 0;
 
 
-	function __construct(modX &$modx,array $config = array()) {
+	public function __construct(modX &$modx,array $config = array()) {
 		$this->modx =& $modx;
 
 		$corePath = $this->modx->getOption('msearch2.core_path', $config, $this->modx->getOption('core_path').'components/msearch2/');
 		$assetsUrl = $this->modx->getOption('msearch2.assets_url', $config, $this->modx->getOption('assets_url').'components/msearch2/');
-		$actionUrl = $this->modx->getOption('minishop2.action_url', $config, $assetsUrl.'action.php');
+		$actionUrl = $this->modx->getOption('msearch2.action_url', $config, $assetsUrl.'action.php');
 		$connectorUrl = $assetsUrl.'connector.php';
 
 		$this->config = array_merge(array(
@@ -55,12 +61,17 @@ class mSearch2 {
 			,'introCutAfter' => 250
 			,'filter_delimeter' => '|'
 			,'method_delimeter' => ':'
+			,'values_delimeter' => ','
 			,'split_words' => $this->modx->getOption('mse2_search_split_words', null, '#\s#', true)
 			,'split_all' => '#\s|[,.:;!?"\'(){}\\/\#]#'
+			,'suggestionsRadio' => array()
 		), $config);
 
 		if (!is_array($this->config['languages'])) {
 			$this->config['languages'] = $modx->fromJSON($this->config['languages']);
+		}
+		if (!is_array($this->config['suggestionsRadio'])) {
+			$this->config['suggestionsRadio'] = array_map('trim', explode(',', $this->config['suggestionsRadio']));
 		}
 
 		$this->modx->addPackage('msearch2', $this->config['modelPath']);
@@ -84,7 +95,7 @@ class mSearch2 {
 				}
 				$this->request = new mSearch2ControllerRequest($this);
 				return $this->request->handleRequest();
-			break;
+				break;
 			default:
 				$this->config = array_merge($this->config, $scriptProperties);
 				$this->config['ctx'] = $ctx;
@@ -105,6 +116,9 @@ class mSearch2 {
 							,jsUrl: "'.$this->config['jsUrl'].'web/"
 							,actionUrl: "'.$this->config['actionUrl'].'"
 							,pageId: '.$this->modx->resource->id.'
+							,filter_delimeter: "'.$this->config['filter_delimeter'].'"
+							,method_delimeter: "'.$this->config['method_delimeter'].'"
+							,values_delimeter: "'.$this->config['values_delimeter'].'"
 						};
 						</script>
 					'), true);
@@ -188,7 +202,7 @@ class mSearch2 {
 		$words = preg_split($pcre, $text, -1, PREG_SPLIT_NO_EMPTY);
 		$bulk_words = array();
 		foreach ($words as $v) {
-			if (mb_strlen($v,'UTF-8') >= $this->config['min_word_length']) {
+			if (preg_match('/^[0-9]{2,}$/', $v) || mb_strlen($v,'UTF-8') >= $this->config['min_word_length']) {
 				$word = mb_strtoupper($v, 'UTF-8');
 				$bulk_words[$word] = $word;
 			}
@@ -204,7 +218,7 @@ class mSearch2 {
 	 *
 	 * @return array|string
 	 */
-	function getBaseForms($text, $only_words = 1) {
+	public function getBaseForms($text, $only_words = 1) {
 		$result = array();
 		if (is_array($text)) {
 			foreach ($text as $v) {
@@ -231,7 +245,7 @@ class mSearch2 {
 						//if (!$forms) {$forms = array($word);}
 						if (!$forms) {continue;}
 						foreach ($forms as $form) {
-							if (mb_strlen($form,'UTF-8') >= $this->config['min_word_length']) {
+							if (preg_match('/^[0-9]{2,}$/', $form) || mb_strlen($form,'UTF-8') >= $this->config['min_word_length']) {
 								$result[$form] = $word;
 							}
 						}
@@ -254,7 +268,7 @@ class mSearch2 {
 	 *
 	 * @return array|string
 	 */
-	function getAllForms($text) {
+	public function getAllForms($text) {
 		$result = array();
 		if (is_array($text)) {
 			foreach ($text as $v) {
@@ -324,7 +338,7 @@ class mSearch2 {
 			}
 		}
 
-		$bulk_words = $this->getBulkWords($query, $this->config['split_all']);
+		$bulk_words = $this->getBulkWords($query);
 		if (count($bulk_words) > 1) {
 			$exact = $this->simpleSearch($query);
 			// Exact match bonus
@@ -392,7 +406,7 @@ class mSearch2 {
 	 *
 	 * @return mixed
 	 */
-	function Highlight($text, $query, $htag_open = '<b>', $htag_close = '</b>', $strict = true) {
+	public function Highlight($text, $query, $htag_open = '<b>', $htag_close = '</b>', $strict = true) {
 		$tmp = array_merge(
 			array($query => preg_split($this->config['split_words'], $query, -1, PREG_SPLIT_NO_EMPTY))
 			,$this->getAllForms($query)
@@ -405,7 +419,7 @@ class mSearch2 {
 
 		$text_cut = '';
 		foreach ($words as $key => $word) {
-			if (mb_strlen($word,'UTF-8') < $this->config['min_word_length']) {
+			if (!preg_match('/^[0-9]{2,}$/', $word) && mb_strlen($word,'UTF-8') < $this->config['min_word_length']) {
 				unset($words[$key]);
 				continue;
 			}
@@ -456,24 +470,6 @@ class mSearch2 {
 
 
 	/**
-	 * Recursive implode
-	 *
-	 * @param $glue
-	 * @param array $array
-	 *
-	 * @return string
-	 */
-	function implode_r($glue, array $array) {
-		$result = array();
-		foreach ($array as $v) {
-			$result[] = is_array($v) ? $this->implode_r($glue, $v) : $v;
-		}
-
-		return implode($glue, $result);
-	}
-
-
-	/**
 	 * @param array|string $ids
 	 *
 	 * @return array
@@ -489,11 +485,14 @@ class mSearch2 {
 		if ($build && $prepared = $this->modx->cacheManager->get('msearch2/prep_' . md5(implode(',',$ids) . $this->config['filters']))) {
 			return $prepared;
 		}
-		else if ($filters = $this->modx->cacheManager->get('msearch2/fltr_' . md5(implode(',',$ids) . $this->config['filters']))) {
-			return $filters;
+		else if (!$build && !empty($this->filters)) {
+			return $this->filters;
+		}
+		else if (!$build && $this->filters = $this->modx->cacheManager->get('msearch2/fltr_' . md5(implode(',',$ids)))) {
+			return $this->filters;
 		}
 
-		$this->loadHandler();
+		if (!is_object($this->filtersHandler)) {$this->loadHandler();}
 
 		// Preparing filters
 		$filters = $built = array();
@@ -532,7 +531,8 @@ class mSearch2 {
 			}
 		}
 
-		$this->modx->cacheManager->set('msearch2/fltr_' . md5(implode(',',$ids)), $filters, $this->config['cacheTime']);
+		//$this->modx->cacheManager->set('msearch2/fltr_' . md5(implode(',',$ids)), $filters, $this->config['cacheTime']);
+		$this->filters = $filters;
 		// Building filters
 		if ($build) {
 			foreach ($built as $filter => &$value) {
@@ -565,12 +565,119 @@ class mSearch2 {
 	 * @return array
 	 */
 	public function Filter($ids, array $request) {
-		if (!is_array($ids)) {
-			$ids = explode(',', $ids);
-		}
-		$filters = $this->getFilters($ids, false);
+		if (!is_array($ids)) {$ids = explode(',', $ids);}
+		if (!is_object($this->filtersHandler)) {$this->loadHandler();}
 
-		$methods = array();
+		$filters = $this->getFilters($ids, false);
+		$methods = $this->getMethods();
+
+		foreach ($request as $filter => $requested) {
+			if (!preg_match('/(.*?)'.preg_quote($this->config['filter_delimeter'],'/').'(.*?)/', $filter)) {continue;}
+			$method = !empty($methods[$filter]) ? 'filter' . ucfirst($methods[$filter]) : 'filterDefault';
+
+			list($table, $filter) = explode($this->config['filter_delimeter'], $filter);
+			if (isset($filters[$table][$filter])) {
+				$values = $filters[$table][$filter];
+				$requested = explode($this->config['values_delimeter'], $requested);
+
+				if (method_exists($this->filtersHandler, $method)) {
+					$ids = call_user_func_array(array($this->filtersHandler, $method), array($requested, $values, $ids));
+				}
+				else {
+					//$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Method "'.$method.'" not exists in class "'.get_class($this->filtersHandler).'". Could not build filter "'.$table.$this->config['filter_delimeter'].$filter.'"');
+					$ids = @call_user_func_array(array($this->filtersHandler, 'filterDefault'), array($requested, $values, $ids));
+				}
+			}
+			$this->filter_operations++;
+		}
+
+		return $ids;
+	}
+
+
+	/**
+	 * This method returns preliminary results for each filter
+	 *
+	 * @param $ids
+	 * @param array $request
+	 * @param array $current
+	 *
+	 * @return array
+	 */
+	public function getSuggestions($ids, array $request, array $current = array()) {
+		if (!is_array($ids)) {$ids = explode(',', $ids);}
+		if (!is_object($this->filtersHandler)) {$this->loadHandler();}
+
+		if (method_exists($this->filtersHandler, 'getSuggestions')) {
+			return $this->filtersHandler->getSuggestions($ids, $request, $current);
+		}
+		else {
+			$count_current = count($current);
+			$current = array_flip($current);
+			$filters = $this->getFilters($ids, false);
+			$radio = $this->config['suggestionsRadio'];
+
+			$suggestions = array();
+			foreach ($filters as $table => $fields) {
+				foreach ($fields as $field => $values) {
+					foreach ($values as $value => $resources) {
+						$suggest = $request;
+						$key = $table.$this->config['filter_delimeter'].$field;
+
+						$added = 0;
+						if (isset($request[$key])) {
+							// Types of suggestion can depend from method
+							if (!empty($radio) && in_array($key, $radio)) {
+								$suggest[$key] = $value;
+							}
+							else {
+								$tmp2 = explode($this->config['values_delimeter'], $request[$key]);
+								if (!in_array($value, $tmp2)) {
+									$suggest[$key] .= $this->config['values_delimeter'] . $value;
+									$added = 1;
+								}
+							}
+							$res = $this->Filter($ids, $suggest);
+							if ($added && !empty($res)) {
+								foreach ($res as $k => $v) {
+									if(isset($current[$v])) {
+										unset($res[$k]);
+									}
+								}
+								$count = count($res);
+								if ($count != 0) {
+									$count += $count_current;
+								}
+								//else {$count = $count_current;}
+							}
+							else {
+								$count = count($res);
+							}
+						}
+						else {
+							$suggest[$key] = $value;
+							$res = $this->Filter($ids, $suggest);
+							$count = count($res);
+						}
+
+						@$suggestions[$key][$value] = $count;
+					}
+				}
+			}
+
+			return $suggestions;
+		}
+	}
+
+
+	/**
+	 * Returns methods names, that will filter values
+	 *
+	 * @return array
+	 */
+	public function getMethods() {
+		if (!empty($this->methods)) {return $this->methods;}
+
 		$tmp_filters = array_map('trim', explode(',', $this->config['filters']));
 		foreach ($tmp_filters as $v) {
 			$v = strtolower($v);
@@ -583,78 +690,11 @@ class mSearch2 {
 			}
 
 			$tmp = explode($this->config['method_delimeter'], $filter);
-			$methods[$table.$this->config['filter_delimeter'].$tmp[0]] = !empty($tmp[1]) ? $tmp[1] : 'default';
+			$this->methods[$table.$this->config['filter_delimeter'].$tmp[0]] = !empty($tmp[1]) ? $tmp[1] : 'default';
 		}
 
-		foreach ($request as $filter => $requested) {
-			if (!preg_match('/(.*?)'.preg_quote($this->config['filter_delimeter'],'/').'(.*?)/', $filter)) {continue;}
-			$method = !empty($methods[$filter]) ? 'filter' . ucfirst($methods[$filter]) : 'filterDefault';
-
-			list($table, $filter) = explode($this->config['filter_delimeter'], $filter);
-			if (isset($filters[$table][$filter])) {
-				$values = $filters[$table][$filter];
-				$requested = explode(',', $requested);
-
-				if (method_exists($this->filtersHandler, $method)) {
-					$ids = call_user_func_array(array($this->filtersHandler, $method), array($requested, $values, $ids));
-				}
-				else {
-					$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Method "'.$method.'" not exists in class "'.get_class($this->filtersHandler).'". Could not build filter "'.$table.$this->config['filter_delimeter'].$filter.'"');
-					//$ids = call_user_func_array(array($this->filtersHandler, 'filterDefault'), array($requested, $values, $ids));
-				}
-			}
-		}
-
-		return $ids;
+		return $this->methods;
 	}
-
-
-	public function getSuggestions($ids, array $request, array $current = array()) {
-		if (!is_array($ids)) {
-			$ids = explode(',', $ids);
-		}
-		$filters = $this->getFilters($ids, false);
-
-		$suggestions = array();
-		foreach ($filters as $table => $fields) {
-			foreach ($fields as $field => $values) {
-				foreach ($values as $value => $resources) {
-					$suggest = $request;
-					$key = $table.$this->config['filter_delimeter'].$field;
-
-					$added = 0;
-					if (isset($request[$key])) {
-						$tmp2 = explode(',', $request[$key]);
-						if (!in_array($value, $tmp2)) {
-							$suggest[$key] .= ',' . $value;
-							$added = 1;
-						}
-						$res = $this->Filter($ids, $suggest);
-						if ($added && !empty($res)) {
-							$count = count(array_diff($res, $current));
-							if (!empty($count)) {
-								$count += count($current);
-							}
-						}
-						else {
-							$count = count($res);
-						}
-					}
-					else {
-						$suggest[$key] = $value;
-						$res = $this->Filter($ids, $suggest);
-						$count = count($res);
-					}
-
-					@$suggestions[$key][$value] = $count;
-				}
-			}
-		}
-
-		return $suggestions;
-	}
-
-
 
 	/**
 	 * Method for transform array to placeholders
@@ -666,7 +706,7 @@ class mSearch2 {
 	public function makePlaceholders(array $array = array(), $prefix = '') {
 		$result = array(
 			'pl' => array()
-			,'vl' => array()
+		,'vl' => array()
 		);
 		foreach ($array as $k => $v) {
 			if (is_array($v)) {
@@ -715,4 +755,5 @@ class mSearch2 {
 
 		return true;
 	}
+
 }

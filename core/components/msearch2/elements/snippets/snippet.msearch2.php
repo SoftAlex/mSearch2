@@ -23,7 +23,7 @@ if (empty($resources)) {
 	if (empty($query) && isset($_REQUEST[$queryVar])) {
 		return $modx->lexicon('mse2_err_no_query');
 	}
-	else if (mb_strlen($query,'UTF-8') < $minQuery && !empty($query)) {
+	else if (!empty($query) && !preg_match('/^[0-9]{2,}$/', $query) && mb_strlen($query,'UTF-8') < $minQuery) {
 		return $modx->lexicon('mse2_err_min_query');
 	}
 	else if (empty($query)) {
@@ -44,6 +44,10 @@ if (empty($resources)) {
 	else if (empty($found)) {
 		return $modx->lexicon('mse2_err_no_results');
 	}
+}
+else if (strpos($resources, '{') === 0) {
+	$found = $modx->fromJSON($resources);
+	$resources = implode(',', array_keys($found));
 }
 
 /*----------------------------------------------------------------------------------*/

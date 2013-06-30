@@ -1,9 +1,29 @@
 Changelog for mSearch2.
 
+0.6.0 beta
+==============
+- System setting "mse2_index_min_words_length" is set to 4 by default, for exclude prepositions.
+- Numbers with length >= 2 are always in search, no matter what set in "mse2_index_min_words_length".
+- Now mSearch2::getSuggestions() can be overloaded in class mse2FiltersHandler.
+- [mFilter2] Added support for MS2 multi categories.
+- [mFilter2] Added support for specify limit.
+- [mFilter2] Added parameter "toPlaceholder".
+- [mFilter2] Parameter "disableSuggestions" is now boolean "suggestions".
+- [mFilter2] Added parameter "suggestionsMaxResults" for disable suggestions when too many results.
+- [mFilter2] Added parameter "suggestionsMaxFilters" for disable suggestions when too many filters.
+- [mFilter2] Added parameter "suggestionsRadio" for radio filters.
+- [mFilter2] Added chunk "tpl.mFilter2.filter.radio".
+- [mFilter2] Added parameters: "filter_delimeter", "method_delimeter" and "values_delimeter".
+- [mFilter2] Added saving of weight of found resources, if used snippet mSearch2 for display items.
+- [mSearch2] Parameter "resources" now can take a JSON string with id as a key, and weight as a value.
+- [mSearch2] Added total number of filter operations in log.
+- Speed improvements.
+
 0.5.1 pl2
 ==============
 - Fixed work with "&includeTVs" when snippet mFilter2 calls snippet mSearch2.
 - Added verification for non existing filter methods.
+- Filter speed improvements.
 
 0.5.1 pl1
 ==============

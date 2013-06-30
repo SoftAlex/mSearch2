@@ -78,10 +78,41 @@ $tmp = array(
 		'type' => 'combo-boolean'
 		,'value' => false
 	)
-	,'disableSuggestions' => array(
+	,'suggestions' => array(
+		'type' => 'combo-boolean'
+		,'value' => true
+	)
+	,'suggestionsMaxFilters' => array(
+		'type' => 'numberfield'
+		,'value' => 200
+	)
+	,'suggestionsMaxResults' => array(
+		'type' => 'numberfield'
+		,'value' => 1000
+	)
+	,'suggestionsRadio' => array(
+		'type' => 'textfield'
+		,'value' => ''
+	)
+
+	,'toPlaceholder' => array(
 		'type' => 'combo-boolean'
 		,'value' => false
 	)
+
+	,'filter_delimeter' => array(
+		'type' => 'textfield'
+		,'value' => '|'
+	)
+	,'method_delimeter' => array(
+		'type' => 'textfield'
+		,'value' => ':'
+	)
+	,'values_delimeter' => array(
+		'type' => 'textfield'
+		,'value' => ','
+	)
+
 );
 
 foreach ($tmp as $k => $v) {

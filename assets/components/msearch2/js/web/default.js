@@ -18,10 +18,12 @@ mSearch2 = {
 	,initialize: function(selector) {
 		var elements = ['filters','results','pagination','total','sort'];
 		for (i in elements) {
-			var elem = elements[i];
-			this[elem] = $(selector).find(this.options[elem]);
-			if (!this[elem].length) {
-				//console.log('Error: could not initialize element "' + elem + '" with selector "' + this.options[elem] + '".');
+			if (elements.hasOwnProperty(i)) {
+				var elem = elements[i];
+				this[elem] = $(selector).find(this.options[elem]);
+				if (!this[elem].length) {
+					//console.log('Error: could not initialize element "' + elem + '" with selector "' + this.options[elem] + '".');
+				}
 			}
 		}
 
@@ -78,15 +80,10 @@ mSearch2 = {
 
 	,load: function() {
 		var params = this.getFilters();
-		if (mSearch2Config.query != '') {
-			params.query = mSearch2Config.query;
-		}
-		if (mSearch2Config.sort != '') {
-			params.sort = mSearch2Config.sort;
-		}
-		if (mSearch2Config.page > 0) {
-			params.page = mSearch2Config.page;
-		}
+		if (mSearch2Config.query != '') {params.query = mSearch2Config.query;}
+		if (mSearch2Config.sort != '') {params.sort = mSearch2Config.sort;}
+		if (mSearch2Config.page > 0) {params.page = mSearch2Config.page;}
+		if (mSearch2Config.limit > 0) {params.limit = mSearch2Config.limit;}
 		this.Hash.set(params);
 
 		params.action = 'filter';
@@ -113,10 +110,9 @@ mSearch2 = {
 
 	,getFilters: function() {
 		var data = {};
-
 		$.map(this.filters.serializeArray(), function(n, i) {
 			if (data[n['name']]) {
-				data[n['name']] += ',' + n['value'];
+				data[n['name']] += mSearch2Config.values_delimeter + n['value'];
 			}
 			else {
 				data[n['name']] = n['value'];
@@ -133,7 +129,7 @@ mSearch2 = {
 				for (value in arr) {
 					if (arr.hasOwnProperty(value)) {
 						var count = arr[value];
-						var selector = filter.replace(mSearch2Config.delimeter, "\\" + mSearch2Config.delimeter);
+						var selector = filter.replace(mSearch2Config.filter_delimeter, "\\" + mSearch2Config.filter_delimeter);
 						var input = $('#' + mSearch2.options.prefix + selector, mSearch2.filters).find('[value="' + value + '"]');
 						var proptype = input.prop('type');
 						if (proptype != 'checkbox' && proptype != 'radio') {continue;}

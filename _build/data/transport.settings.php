@@ -31,7 +31,7 @@ $tmp = array(
 	)
 	,'index_min_words_length' => array(
 		'xtype' => 'numberfield'
-		,'value' => 3
+		,'value' => 4
 		,'area' => 'mse2_index'
 	)
 

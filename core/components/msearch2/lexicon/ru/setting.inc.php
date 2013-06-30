@@ -17,7 +17,7 @@ $_lang['setting_mse2_index_comments_desc'] = 'Если эта настройка
 $_lang['setting_mse2_index_comments_weight'] = 'Вес слова в комментарии';
 $_lang['setting_mse2_index_comments_weight_desc'] = 'Укажите вес слова для комментария. По умолчанию - "1".';
 $_lang['setting_mse2_index_min_words_length'] = 'Минимальная длина слова';
-$_lang['setting_mse2_index_min_words_length_desc'] = 'Укажите минимальную длину слова, которое будет учавствовать в поиске для исключения ложных срабатываний. По умолчанию - "3".';
+$_lang['setting_mse2_index_min_words_length_desc'] = 'Укажите минимальную длину слова, которое будет участвовать в поиске для исключения ложных срабатываний. По умолчанию - "4".';
 
 $_lang['setting_mse2_search_exact_match_bonus'] = 'Балл за точное совпадение';
 $_lang['setting_mse2_search_exact_match_bonus_desc'] = 'Укажите, сколько баллов добавлять за точное совпадение поисковой фразы и содержимого страницы. По умолчанию - "5".';

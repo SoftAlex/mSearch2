@@ -17,7 +17,7 @@ $_lang['setting_mse2_index_comments_desc'] = 'If true and you using component "T
 $_lang['setting_mse2_index_comments_weight'] = 'Weight of word in comment';
 $_lang['setting_mse2_index_comments_weight_desc'] = 'You can specify weight of word in comment. Default is "1".';
 $_lang['setting_mse2_index_min_words_length'] = 'Minimum length of words';
-$_lang['setting_mse2_index_min_words_length_desc'] = 'Specify the minimum length of words that will be in index. Default value "3".';
+$_lang['setting_mse2_index_min_words_length_desc'] = 'Specify the minimum length of words that will be in index. Default value "4".';
 
 $_lang['setting_mse2_search_exact_match_bonus'] = 'Bonus for an exact match';
 $_lang['setting_mse2_search_exact_match_bonus_desc'] = 'Specify the number of points added for an exact match the search phrase and the result. Default is "5".';
