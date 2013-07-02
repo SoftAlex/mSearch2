@@ -141,12 +141,18 @@ class mse2FiltersHandler {
 	public function getResourceValues(array $fields, array $ids) {
 		$filters = array();
 		$q = $this->modx->newQuery('modResource');
-		$q->where(array('id:IN' => $ids));
 		$q->select('id,' . implode(',', $fields));
+		$q->where(array('modResource.id:IN' => $ids));
+		if (in_array('parent', $fields) && class_exists('msProduct')) {
+			$q->leftJoin('msCategoryMember','Member', '`Member`.`product_id` = `modResource`.`id`');
+			$q->orCondition(array('Member.product_id:IN' => $ids));
+			$q->select('category_id');
+		}
 		if ($q->prepare() && $q->stmt->execute()) {
 			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
 				foreach ($row as $k => $v) {
 					$v = trim($v);
+					if ($k == 'category_id') {$k = 'parent';}
 					if ($v == '' || $k == 'id') {continue;}
 					else if (isset($filters[$k][$v])) {
 						$filters[$k][$v][] = $row['id'];
@@ -154,7 +160,6 @@ class mse2FiltersHandler {
 					else {
 						$filters[$k][$v] = array($row['id']);
 					}
-
 				}
 			}
 		}
