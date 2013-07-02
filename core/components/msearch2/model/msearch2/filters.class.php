@@ -360,6 +360,19 @@ class mse2FiltersHandler {
 
 
 	/**
+	 * Prepares values for filter
+	 * Returns array with human-readable parent of resource
+	 *
+	 * @param array $values
+	 *
+	 * @return array Prepared values
+	 */
+	public function buildCategoriesFilter(array $values) {
+		return $this->buildParentsFilter($values, 0);
+	}
+
+
+	/**
 	 * Returns string for insert into sorting properties of pdoTools snippet
 	 *
 	 * @param string
