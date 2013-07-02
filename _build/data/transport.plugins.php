@@ -39,7 +39,7 @@ foreach ($tmp as $k => $v) {
 			$event = $modx->newObject('modPluginEvent');
 			$event->fromArray(array(
 				'event' => $v2,
-				'priority' => 0,
+				'priority' => 1,
 				'propertyset' => 0,
 			),'',true,true);
 

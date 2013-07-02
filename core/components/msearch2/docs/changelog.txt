@@ -1,5 +1,10 @@
 Changelog for mSearch2.
 
+0.6.1 beta
+==============
+- Added ability to work with mSearch1 for smooth upgrade.
+- Fixed bug with installation when "archive_with" setting is enabled.
+
 0.6.0 beta
 ==============
 - System setting "mse2_index_min_words_length" is set to 4 by default, for exclude prepositions.

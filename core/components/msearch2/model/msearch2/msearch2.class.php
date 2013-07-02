@@ -166,7 +166,9 @@ class mSearch2 {
 	 * @return boolean
 	 */
 	public function loadPhpMorphy() {
-		require_once $this->config['corePath'] . 'phpmorphy/src/common.php';
+		if (!class_exists('phpMorphy_Exception')) {
+			require_once $this->config['corePath'] . 'phpmorphy/src/common.php';
+		}
 
 		foreach ($this->config['languages'] as $lang => $options) {
 			if (!empty($this->phpMorphy[$lang]) && $this->phpMorphy[$lang] instanceof phpMorphy) {

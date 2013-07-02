@@ -4,7 +4,7 @@
 define('PKG_NAME','mSearch2');
 define('PKG_NAME_LOWER',strtolower(PKG_NAME));
 
-define('PKG_VERSION','0.6.0');
+define('PKG_VERSION','0.6.1');
 define('PKG_RELEASE','beta');
 
 /* define paths */
