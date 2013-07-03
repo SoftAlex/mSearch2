@@ -381,6 +381,46 @@ class mse2FiltersHandler {
 
 
 	/**
+	 * Prepares values for filter
+	 * Returns array with user id replaced to any field from modUserProfile
+	 *
+	 * @param array $values
+	 * @param string $field
+	 *
+	 * @return array Prepared values
+	 */
+	public function buildFullnameFilter(array $values, $field = 'fullname') {
+		$users = array_keys($values);
+		if (empty($users) || (count($users) < 2 && empty($this->config['showEmptyFilters']))) {
+			return array();
+		}
+
+		$results = array();
+		$q = $this->modx->newQuery('modUserProfile', array('internalKey:IN' => $users));
+		$q->select('id,'.$field);
+		if ($q->prepare() && $q->stmt->execute()) {
+			$users = array();
+			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
+				$users[$row['id']] = $row[$field];
+			}
+
+			foreach ($values as $user => $ids) {
+				$title = !isset($users[$user]) ? $this->modx->lexicon('mse2_filter_boolean_no') : $users[$user];
+				$results[$title] = array(
+					'title' => $title
+					,'value' => $user
+					,'type' => $field
+					,'resources' => $ids
+				);
+			}
+		}
+
+		ksort($results);
+		return $results;
+	}
+
+
+	/**
 	 * Returns string for insert into sorting properties of pdoTools snippet
 	 *
 	 * @param string
