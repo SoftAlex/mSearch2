@@ -185,9 +185,8 @@ class mse2FiltersHandler {
 		}
 
 		$results = array();
-		ksort($values);
 		foreach ($values as $value => $ids) {
-			$results[] = array(
+			$results[$value] = array(
 				'title' => $value
 				,'value' => $value
 				,'type' => 'default'
@@ -195,6 +194,7 @@ class mse2FiltersHandler {
 			);
 		}
 
+		ksort($results);
 		return $results;
 	}
 
@@ -263,8 +263,9 @@ class mse2FiltersHandler {
 			}
 
 			foreach ($values as $vendor => $ids) {
-				$results[] = array(
-					'title' => !isset($vendors[$vendor]) ? $this->modx->lexicon('mse2_filter_boolean_no') : $vendors[$vendor]
+				$title = !isset($vendors[$vendor]) ? $this->modx->lexicon('mse2_filter_boolean_no') : $vendors[$vendor];
+				$results[$title] = array(
+					'title' => $title
 					,'value' => $vendor
 					,'type' => 'vendor'
 					,'resources' => $ids
@@ -272,6 +273,7 @@ class mse2FiltersHandler {
 			}
 		}
 
+		ksort($results);
 		return $results;
 	}
 
@@ -291,14 +293,16 @@ class mse2FiltersHandler {
 
 		$results = array();
 		foreach ($values as $value => $ids) {
-			$results[] = array(
-				'title' => empty($value) ? $this->modx->lexicon('mse2_filter_boolean_no') : $this->modx->lexicon('mse2_filter_boolean_yes')
+			$title = empty($value) ? $this->modx->lexicon('mse2_filter_boolean_no') : $this->modx->lexicon('mse2_filter_boolean_yes');
+			$results[$title] = array(
+				'title' => $title
 				,'value' => $value
 				,'type' => 'boolean'
 				,'resources' => $ids
 			);
 		}
 
+		ksort($results);
 		return $results;
 	}
 
@@ -316,7 +320,6 @@ class mse2FiltersHandler {
 			return array();
 		}
 
-		ksort($values);
 		$results = $parents = array();
 		foreach ($values as $value => $ids) {
 			$pids = array($value);

@@ -5,7 +5,7 @@ define('PKG_NAME','mSearch2');
 define('PKG_NAME_LOWER',strtolower(PKG_NAME));
 
 define('PKG_VERSION','0.6.1');
-define('PKG_RELEASE','beta1');
+define('PKG_RELEASE','beta2');
 
 /* define paths */
 define('MODX_BASE_PATH', dirname(dirname(dirname(__FILE__))) . '/');

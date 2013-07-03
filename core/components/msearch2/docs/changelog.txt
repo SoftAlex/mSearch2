@@ -1,11 +1,12 @@
 Changelog for mSearch2.
 
-0.6.1 beta1
+0.6.1 beta2
 ==============
 - Added ability to work with mSearch1 for smooth upgrade.
 - Fixed bug with installation when "archive_with" setting is enabled.
-- Added method mse2FiltersHandler::buildCategoriesFilter()
-- Improved work with MS2 multi categories
+- Added method mse2FiltersHandler::buildCategoriesFilter().
+- Improved work with MS2 multi categories.
+- Fixed sort of filter values in ascending order.
 
 0.6.0 beta
 ==============
