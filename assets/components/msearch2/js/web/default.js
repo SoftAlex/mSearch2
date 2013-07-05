@@ -51,7 +51,7 @@ mSearch2 = {
 				$(mSearch2.options.pagination).removeClass(mSearch2.options.active_class);
 				$(this).addClass(mSearch2.options.active_class);
 
-				var tmp = $(this).prop('href').match(/page=(\d+)/);
+				var tmp = $(this).prop('href').match(/page[=|\/](\d+)/);
 				var page = tmp && tmp[1] ? Number(tmp[1]) : 1;
 				mSearch2Config.page = (page != mSearch2Config.start_page) ? page : '';
 
