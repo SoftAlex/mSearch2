@@ -1,6 +1,6 @@
 Changelog for mSearch2.
 
-0.6.1 beta2
+0.6.1 rc
 ==============
 - Added method mse2FiltersHandler::buildCategoriesFilter().
 - Added method mse2FiltersHandler::buildFullnameFilter().
